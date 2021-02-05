@@ -3,7 +3,7 @@
 /**
  * DataHelpers
  *
- * {DESCRIPTION}
+ * Helpers for the Data Service
  *
  * @package DataService
  * @author akirk
