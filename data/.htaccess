@@ -1,0 +1,16 @@
+# ----------------------------------------------------------------------
+# Single Entry Point
+# ----------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+	Options +FollowSymlinks
+	RewriteEngine On
+	RewriteBase /data
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php/$1 [NC,L]
+</IfModule>
+
+
+#php_value display_errors On
+php_value display_errors Off

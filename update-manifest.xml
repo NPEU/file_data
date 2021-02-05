@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<updates>
+    <update>
+        <name>NPEU: file_data</name>
+        <description>Joomla! file_data file</description>
+        <element>file_data</element>
+        <type>file</type>
+        <version>1.0.0</version>
+        <client>site</client>
+        <infourl title="NPEU: file_data">https://github.com/NPEU/file_data/releases/tag/v1.0.0</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://github.com/NPEU/file_data/archive/v1.0.0.zip</downloadurl>
+        </downloads>
+        <targetplatform name="joomla" />
+        <tags>
+            <tag>stable</tag>
+        </tags>
+    </update>
+</updates>
