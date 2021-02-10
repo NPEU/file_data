@@ -18,7 +18,7 @@ class Staff extends DataServiceDB
     public function __construct()
     {
         parent::__construct();
-        
+
         $jhostname = 'localhost';
 
         if (DEV) {
@@ -67,7 +67,7 @@ class Staff extends DataServiceDB
     public function init()
     {
         #file_put_contents(__DIR__ . '/log.txt', $_SERVER['REMOTE_ADDR']);
-        
+
         // This service relies on the staff profile Jooomla plugin:
         $profile_file = $_SERVER['DOCUMENT_ROOT'] . '/plugins/user/staffprofile/profiles/profile.xml';
         if (!file_exists($profile_file)) {
@@ -83,7 +83,7 @@ class Staff extends DataServiceDB
         #echo "<pre>\n";var_dump($data);echo "</pre>\n";exit;
         $new_data = array();
 
-        $not_basic_data = array(
+        /*$not_basic_data = array(
             'biography',
             'custom',
             'custom_title',
@@ -93,6 +93,20 @@ class Staff extends DataServiceDB
             'team',
             'pa',
             'pa_details_only'
+        );*/
+        $basic_data = array(
+            'id',
+            'name',
+            'email',
+            'firstname',
+            'lastname',
+            'alias',
+            'displaygroup',
+            'role',
+            'title',
+            'qualifications',
+            'avatar_img',
+            'profile_img_src'
         );
 
         foreach ($data as $key => $item) {
@@ -103,10 +117,13 @@ class Staff extends DataServiceDB
             #echo "<pre>\n";var_dump($sql);echo "</pre>\n";
             foreach ($this->dao->query($sql) as $row) {
                 $profile_key = str_replace(array('staffprofile.', 'firstlastnames.'), '', $row['profile_key']);
-                if ($this->basic_data_only && in_array($profile_key, $not_basic_data)) {
-                    continue;
+                if ($this->basic_data_only) {
+                    if(in_array($profile_key, $basic_data)) {
+                        $item[$profile_key] = $row['profile_value'];
+                    }
+                } else {
+                    $item[$profile_key] = $row['profile_value'];
                 }
-                $item[$profile_key] = $row['profile_value'];
             }
             #echo "<pre>\n";var_dump($item);echo "</pre>\n";exit;
             // Add any publications:
@@ -262,14 +279,12 @@ class Staff extends DataServiceDB
             if (!isset($item['alias'])) {
                 $item['alias'] = preg_replace('/[^a-z0-9-]/', '', strtolower(str_replace(' ', '-', $item['firstname'] . ' ' . $item['lastname']))) . '-' . $item['id'];
             }
-            
+
+
             // PA
-            if (!$this->basic_data_only && !isset($item['pa'])) {
-                $item['pa'] = '';
-            }
-            
-            if (!$this->basic_data_only && !isset($item['pa_details_only'])) {
-                $item['pa_details_only'] = '';
+            if (!empty($item['pa'])) {              
+                $pa_data = json_decode(file_get_contents($_SERVER['DOMAIN'] . '/data/staff?id=' . $item['pa'] . '&basic=1'), true);
+                $item['pa_details'] = $pa_data[0];
             }
 
             // Remove private data if not NPEU IP address:
