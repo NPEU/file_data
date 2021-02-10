@@ -90,7 +90,9 @@ class Staff extends DataServiceDB
             'projects',
             'publications_manual',
             'publications_query',
-            'team'
+            'team',
+            'pa',
+            'pa_details_only'
         );
 
         foreach ($data as $key => $item) {
@@ -259,6 +261,15 @@ class Staff extends DataServiceDB
             // Maybe temporary?
             if (!isset($item['alias'])) {
                 $item['alias'] = preg_replace('/[^a-z0-9-]/', '', strtolower(str_replace(' ', '-', $item['firstname'] . ' ' . $item['lastname']))) . '-' . $item['id'];
+            }
+            
+            // PA
+            if (!$this->basic_data_only && !isset($item['pa'])) {
+                $item['pa'] = '';
+            }
+            
+            if (!$this->basic_data_only && !isset($item['pa_details_only'])) {
+                $item['pa_details_only'] = '';
             }
 
             // Remove private data if not NPEU IP address:
