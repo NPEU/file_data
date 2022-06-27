@@ -111,8 +111,6 @@ abstract class DataService
 
 	protected function collectData($data = array(), $keys = array(), $field = '', $collect_name = '', $meta = array())
 	{
-		#echo "<pre>"; var_dump( $keys ); echo "</pre>"; exit;
-		#echo "<pre>"; var_dump( $keys ); echo "</pre>"; exit;
 		$container = array();
 		if (empty($keys)) {
 			$keys = array('*');
@@ -139,7 +137,6 @@ abstract class DataService
 			}
 			$container[$key]['length'] = $length;
 		}
-        #echo "<pre>"; var_dump( $container ); echo "</pre>"; exit;
 		return $container;
 	}
 }
