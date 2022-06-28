@@ -71,18 +71,20 @@ class Trials extends DataServiceDB
         $public_root_path = realpath($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR;
         foreach ($data as &$item) {
             
-            $image_path       = $public_root_path . $item['logo_png_path'];
-            $image_info       = getimagesize($image_path);
-            $image_real_ratio = $image_info[0] / $image_info[1];
+            $image_path       = $public_root_path . trim($item['logo_png_path'], '/');
+            if (file_exists($image_path) && is_file($image_path)) {
+                $image_info       = getimagesize($image_path);
+                $image_real_ratio = $image_info[0] / $image_info[1];
 
-            $height = 120;
-            if ($image_info[0] > $image_info[1]) {
-                $width = round($height * $image_real_ratio);
-            } else {
-                $width = round($height / $image_real_ratio);
+                $height = 120;
+                if ($image_info[0] > $image_info[1]) {
+                    $width = round($height * $image_real_ratio);
+                } else {
+                    $width = round($height / $image_real_ratio);
+                }
+                $item['fallback_logo_height'] = $height;
+                $item['fallback_logo_width']  = $width;
             }
-            $item['fallback_logo_height'] = $height;
-            $item['fallback_logo_width']  = $width;
         }
         return $data;
     }
