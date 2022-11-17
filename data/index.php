@@ -2,7 +2,7 @@
 #echo "<pre>\n"; var_dump($_GET); echo "</pre>\n";;
 #echo "<pre>\n"; var_dump($_SERVER); echo "</pre>\n";
 #echo "<pre>\n"; var_dump($_COOKIE); echo "</pre>\n";
-$application_env = $_SERVER['SERVER_NAME'] == 'dev.npeu.ox.ac.uk' ? 'development' : ($_SERVER['SERVER_NAME'] == 'test.npeu.ox.ac.uk' ? 'testing' : 'production');
+$application_env = $_SERVER['SERVER_NAME'] == 'dev.npeu.ox.ac.uk' ? 'development' : (($_SERVER['SERVER_NAME'] == 'test.npeu.ox.ac.uk' || $_SERVER['SERVER_NAME'] == 'next.npeu.ox.ac.uk') ? 'testing' : 'production');
 if ($application_env == 'development') {
 	@define('DEV', true);
     ini_set('display_errors', 'on');
@@ -36,14 +36,14 @@ if (DEV) {
     define( 'JPATH_BASE', BASE_PATH . 'jan_dev' . DS .'public' );
     define( 'TOP_DOMAIN', 'https://dev.npeu.ox.ac.uk' );
     define( 'JDB', 'jan_dev' );
-} elseif (TEST) {	
+} elseif (TEST) {
     define( 'JPATH_BASE', BASE_PATH . 'jan_test' . DS .'public' );
     define( 'TOP_DOMAIN', 'https://test.npeu.ox.ac.uk' );
-    define( 'JDB', 'jan_test' );	
-} else {	
+    define( 'JDB', 'jan_test' );
+} else {
     define( 'JPATH_BASE', BASE_PATH . 'jan' . DS .'public' );
     define( 'TOP_DOMAIN', 'https://www.npeu.ox.ac.uk' );
-    define( 'JDB', 'jan' );	
+    define( 'JDB', 'jan' );
 }
 #echo "<pre>"; var_dump( DEV ); echo "</pre>"; exit;
 require_once ( JPATH_BASE . DS .'includes' . DS . 'defines.php' );
@@ -217,10 +217,10 @@ if ($helpers) {
 	if (isset($collect[1])) {
 		$collect_order = $collect[1];
 	}*/
-    
+
     $helpers_list = explode(',', $helpers);
     $n_helpers = count($helpers_list);
-    
+
     foreach($helpers_list as $helper) {
         $helper_order = false;
         $helper = explode('_', $helper);
@@ -228,7 +228,7 @@ if ($helpers) {
         if (isset($helper[1])) {
             $helper_order = $helper[1];
         }
-        
+
         $helper_method = 'getHelper' . ucfirst(strtolower($helper_name));
         if (method_exists($service, $helper_method)) {
             $helper_data = $service->$helper_method($helper_order);
