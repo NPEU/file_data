@@ -2,7 +2,7 @@
 #echo "<pre>\n"; var_dump($_GET); echo "</pre>\n";;
 #echo "<pre>\n"; var_dump($_SERVER); echo "</pre>\n";
 #echo "<pre>\n"; var_dump($_COOKIE); echo "</pre>\n";
-$application_env = $_SERVER['SERVER_NAME'] == 'dev.npeu.ox.ac.uk' ? 'development' : (($_SERVER['SERVER_NAME'] == 'test.npeu.ox.ac.uk' || $_SERVER['SERVER_NAME'] == 'next.npeu.ox.ac.uk') ? 'testing' : 'production');
+$application_env = $_SERVER['SERVER_NAME'] == 'dev.npeu.ox.ac.uk' ? 'development' : (($_SERVER['SERVER_NAME'] == 'test.npeu.ox.ac.uk' || $_SERVER['SERVER_NAME'] == 'sandbox.npeu.ox.ac.uk' || $_SERVER['SERVER_NAME'] == 'next.npeu.ox.ac.uk') ? 'testing' : 'production');
 if ($application_env == 'development') {
 	@define('DEV', true);
     ini_set('display_errors', 'on');
