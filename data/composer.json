@@ -1,0 +1,16 @@
+{
+    "name": "npeu/file_data",
+    "description": "This file lists all the PHP packages required for the project.",
+    "type": "project",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "fylax/forceutf8": "~3.0"
+    },
+    "authors": [
+        {
+            "name": "Andy Kirk",
+            "email": "andy.kirk@npeu.ox.ac.uk"
+        }
+    ]
+}

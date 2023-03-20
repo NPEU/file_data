@@ -1,6 +1,7 @@
 <?php
-require (__DIR__ . '/Encoding.php');
+require_once __DIR__ . '/vendor/autoload.php';
 use \ForceUTF8\Encoding;
+
 /**
  * DataServiceDB
  *
@@ -161,31 +162,31 @@ class DataServiceDB extends DataService
 	protected function parseValue($value, $field, $sql_fragment)
 	{
         // Hacky fix to make the regix easier.
-        // I've change the !_, notation for _NOT_, _AND_, _OR_ but the NOT was more complicated to 
+        // I've change the !_, notation for _NOT_, _AND_, _OR_ but the NOT was more complicated to
         // convert, so I've allowed the new syntax through till this point, then I'm converting it
         // back so the rest of the logic remains as-is.
         $value = str_replace('_NOT_', '!', $value);
-        
+
         // Similar to above, allow , through too. I think/hope these are less likely to cause
-        // problems - the main reason for changing the notation was to allow _ in values (i.e. 
+        // problems - the main reason for changing the notation was to allow _ in values (i.e.
         // usernames should be allowed these characters)
         $value = str_replace(',', '_OR_', $value);
-        
+
 		$i      = 0;
 		$j      = 0;
 		$sql    = $value;
 		$values = array();
 		#$sql_fragment = '`' . $field . '` ' . $sql_fragment;
 		// Switch NOT operator for NOT LIKE or !=
-        
+
         #echo "<pre>\n";var_dump($value);echo "</pre>\n";
         #echo "<pre>\n";var_dump($field);echo "</pre>\n";
         #echo "<pre>\n";var_dump($sql_fragment);echo "</pre>\n";
 
 
-        
+
 		$not    = strpos($sql_fragment, 'LIKE') !== false ? 'NOT ' : '!';
-		
+
 		// general processing here
 
 		#if (preg_match_all('/\(?([!~><=])?([^!~><=)]+)\)?/', $value, $matches, PREG_SET_ORDER)) {
@@ -203,7 +204,7 @@ class DataServiceDB extends DataService
 				}
                 #echo "delim<pre>\n";var_dump($delim);echo "</pre>\n";
                 #echo "op<pre>\n";var_dump($op);echo "</pre>\n";
-                
+
 				$segment = $match[2];
 				$segment = str_replace($delim, $op, $segment);
 				#echo "Seg1<pre>\n";var_dump($segment);echo "</pre>\n";

@@ -282,7 +282,7 @@ class Staff extends DataServiceDB
 
 
             // PA
-            if (!empty($item['pa'])) {              
+            if (!empty($item['pa']) && is_array($item['pa']) && !empty($item['pa'][0])) {
                 $pa_data = json_decode(file_get_contents($_SERVER['DOMAIN'] . '/data/staff?id=' . $item['pa'] . '&basic=1'), true);
                 $item['pa_details'] = $pa_data[0];
             }

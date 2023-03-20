@@ -21,8 +21,8 @@ abstract class DataService
 	public $helpers_order = false;
 	public $limit         = false;
 	public $order         = false;
-    
-    
+
+
 	public $is_staff      = false;
 
 	protected $data;
