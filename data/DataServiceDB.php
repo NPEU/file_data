@@ -116,7 +116,7 @@ class DataServiceDB extends DataService
 		}
 
 		if ($this->group) {
-			$sql .= "\GROUP BY :group";
+			$sql .= "\nGROUP BY :group";
 			$values[':group'] = $this->group;
 		}
 
