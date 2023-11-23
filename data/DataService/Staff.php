@@ -69,7 +69,7 @@ class Staff extends DataServiceDB
         #file_put_contents(__DIR__ . '/log.txt', $_SERVER['REMOTE_ADDR']);
 
         // This service relies on the staff profile Jooomla plugin:
-        $profile_file = $_SERVER['DOCUMENT_ROOT'] . '/plugins/user/staffprofile/profiles/profile.xml';
+        $profile_file = $_SERVER['DOCUMENT_ROOT'] . '/plugins/user/staffprofile/forms/profile.xml';
         if (!file_exists($profile_file)) {
             #trigger_error('Staff service relies on the staff profile jooomla plugin', E_USER_WARNING);
             return false;
@@ -282,7 +282,7 @@ class Staff extends DataServiceDB
 
 
             // PA
-            if (!empty($item['pa']) && is_array($item['pa']) && !empty($item['pa'][0])) {
+            if (!empty($item['pa'])) {
                 $pa_data = json_decode(file_get_contents($_SERVER['DOMAIN'] . '/data/staff?id=' . $item['pa'] . '&basic=1'), true);
                 $item['pa_details'] = $pa_data[0];
             }
@@ -354,7 +354,7 @@ class Staff extends DataServiceDB
 
     public function getHelperDisplaygroup($order = false)
     {
-        $form_string = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/plugins/user/staffprofile/profiles/profile.xml');
+        $form_string = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/plugins/user/staffprofile/forms/profile.xml');
         $form_xml    = new SimpleXMLElement($form_string);
         $option_objs = $form_xml->xpath('//field[@name="displaygroup"]/option[@value!=""]');
         $data        = array();
