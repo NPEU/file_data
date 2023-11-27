@@ -1,19 +1,39 @@
 <?php
-#echo "<pre>\n"; var_dump($_GET); echo "</pre>\n";;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\Event\Dispatcher as EventDispatcher;
+
+
+#echo "<pre>\n"; var_dump($_GET); echo "</pre>\n";
 #echo "<pre>\n"; var_dump($_SERVER); echo "</pre>\n";
 #echo "<pre>\n"; var_dump($_COOKIE); echo "</pre>\n";
-$application_env = $_SERVER['SERVER_NAME'] == 'dev.npeu.ox.ac.uk' ? 'development' : (($_SERVER['SERVER_NAME'] == 'test.npeu.ox.ac.uk' || $_SERVER['SERVER_NAME'] == 'sandbox.npeu.ox.ac.uk' || $_SERVER['SERVER_NAME'] == 'next.npeu.ox.ac.uk') ? 'testing' : 'production');
+switch ($_SERVER['SERVER_NAME']) {
+    case 'dev.npeu.ox.ac.uk':
+        $application_env = 'development';
+        break;
+    case 'test.npeu.ox.ac.uk':
+    case 'sandbox.npeu.ox.ac.uk':
+    case 'next.npeu.ox.ac.uk':
+        $application_env = 'testing';
+        break;
+    default:
+        $application_env = 'production';
+}
+
+$application_domain = str_replace('.npeu.ox.ac.uk', '', $_SERVER['SERVER_NAME']);
+
 if ($application_env == 'development') {
-	@define('DEV', true);
+    @define('DEV', true);
     ini_set('display_errors', 'on');
 } else {
-	@define('DEV', false);
+    @define('DEV', false);
 }
 
 if ($application_env == 'testing') {
-	@define('TEST', true);
+    error_reporting(E_ALL ^ E_DEPRECATED);
+    @define('TEST', true);
 } else {
-	@define('TEST', false);
+    @define('TEST', false);
 }
 
 //session_start();
@@ -26,12 +46,13 @@ $params = array();
 
 // Set up Joomla User stuff:
 define('DS', DIRECTORY_SEPARATOR);
-$base_path = realpath(dirname(dirname(dirname(__DIR__))));
+$base_path = realpath(dirname(__DIR__));
 define('BASE_PATH', $base_path . DS);
+#echo "<pre>"; var_dump(BASE_PATH); echo "</pre>"; #exit;
+//define( 'JDATE', 'Y-m-d H:i:s A' );
+//define( '_JEXEC', 1 );
 
-define( 'JDATE', 'Y-m-d H:i:s A' );
-define( '_JEXEC', 1 );
-
+/*
 if (DEV) {
     define( 'JPATH_BASE', BASE_PATH . 'jan_dev' . DS .'public' );
     define( 'TOP_DOMAIN', 'https://dev.npeu.ox.ac.uk' );
@@ -44,28 +65,77 @@ if (DEV) {
     define( 'JPATH_BASE', BASE_PATH . 'jan' . DS .'public' );
     define( 'TOP_DOMAIN', 'https://www.npeu.ox.ac.uk' );
     define( 'JDB', 'jan' );
+}*/
+
+switch ($application_domain) {
+    case 'dev':
+    case 'test':
+    case 'sandbox':
+    case 'next':
+        //define( 'JPATH_BASE', BASE_PATH . 'jan_' . $application_domain . DS .'public' );
+        define( 'TOP_DOMAIN', 'https://' . $_SERVER['SERVER_NAME']);
+        define( 'JDB', 'jan_' . $application_domain);
+        break;
+    default:
+        //define( 'JPATH_BASE', BASE_PATH . 'jan' . DS .'public' );
+        define( 'TOP_DOMAIN', 'https://www.npeu.ox.ac.uk' );
+        define( 'JDB', 'jan' );
 }
-#echo "<pre>"; var_dump( DEV ); echo "</pre>"; exit;
-require_once ( JPATH_BASE . DS .'includes' . DS . 'defines.php' );
-require_once ( JPATH_BASE . DS . 'includes' . DS . 'framework.php' );
-$mainframe = JFactory::getApplication('site');
-$mainframe->initialise(null, false);
 
-JPluginHelper::importPlugin('system');
-JPluginHelper::importPlugin('user');
+define('_JEXEC', 1);
+#define('JPATH_BASE', dirname(__DIR__));
 
-$dispatcher = JEventDispatcher::getInstance();
-$dispatcher->trigger('onAfterInitialise');
+//If this file is not placed in the /root directory of a Joomla instance put the directory for Joomla libraries here.
+$joomla_directory = BASE_PATH;
 
-$session = JFactory::getSession();
-$user = JFactory::getUser();
+// From https://joomla.stackexchange.com/questions/33140/how-to-create-an-instance-of-the-joomla-cms-from-the-browser-or-the-command-line
+// Via: https://joomla.stackexchange.com/questions/33389/standalone-php-script-to-get-username-in-joomla-4
+/**---------------------------------------------------------------------------------
+ * Part 1 - Load the Framework and set up up the environment properties
+ * -------------------------------------------------------------------------------*/
+
+/**
+ *  Site - Front end application when called from Browser via URL.
+*/                                                  // Remove this '*/' to comment out this block
+define('JPATH_BASE', (isset($joomla_directory)) ? $joomla_directory : __DIR__ );
+require_once JPATH_BASE . '/includes/defines.php';
+require_once JPATH_BASE . '/includes/framework.php';
+$class_name             =  new \Joomla\CMS\Application\SiteApplication;
+$session_alias          = 'session.web';
+$session_suffix         = 'web.site';
+/** end Site config */
+
+/**---------------------------------------------------------------------------------
+ * Part 2 - Start the application from the container ready to be used.
+ * -------------------------------------------------------------------------------*/
+// Boot the DI container
+$container = \Joomla\CMS\Factory::getContainer();
+
+// Alias the session service key to the web session service.
+$container->alias($session_alias, 'session.' . $session_suffix)
+          ->alias('JSession', 'session.' . $session_suffix)
+          ->alias(\Joomla\CMS\Session\Session::class, 'session.' . $session_suffix)
+          ->alias(\Joomla\Session\Session::class, 'session.' . $session_suffix)
+          ->alias(\Joomla\Session\SessionInterface::class, 'session.' . $session_suffix);
+
+// Instantiate the application.
+$app = $container->get($class_name::class);
+// Set the application as global app
+\Joomla\CMS\Factory::$application = $app;
+
+#echo "<pre>"; var_dump(get_class_methods($app)); echo "</pre>"; exit;
+
+
+$session = Factory::getSession();
+$user = Factory::getUser();
+$user = Factory::getApplication()->getIdentity();
 
 if (array_key_exists(10, $user->groups)) {
     $params['is_staff'] = true;
 }
 
 //
-
+#echo "<pre>"; var_dump($user); echo "</pre>"; exit;
 /*
 #$json = json_encode(array('staff' => $is_staff_member));
 $json = json_encode($user);
@@ -81,13 +151,13 @@ exit;
 //
 
 if (!defined('DS')) {
-	define('DS', DIRECTORY_SEPARATOR);
+    define('DS', DIRECTORY_SEPARATOR);
 }
 
 set_include_path(implode(PATH_SEPARATOR, array(
-	'DataService',
-	get_include_path(),
-	)));
+    'DataService',
+    get_include_path(),
+    )));
 spl_autoload_register(function($class) {
         @include str_replace('_', '/', $class) . '.php';
     }
@@ -118,7 +188,7 @@ $log_username = NPEU_DATABASE_USR;
 $log_password = NPEU_DATABASE_PWD;
 
 $log_db = new PDO("mysql:host=$log_host;dbname=$log_database", $log_username, $log_password, array(
-	PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
+    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
 ));
 
 $date           = $log_db->quote(date('c'));
@@ -133,7 +203,7 @@ $post_body      = isset($_POST) ? $log_db->quote(file_get_contents('php://input'
 #echo "Body<pre>"; var_dump( $post_body ); echo "</pre>"; exit;
 
 $sql = "INSERT INTO `log` (`date`,`timestamp`,`user_agent`,`remote_address`,`request_uri`,`request_method`,`post_data`,`post_body`) "
-	 . "VALUES ($date,$timestamp,$user_agent,$remote_address,$request_uri,$request_method,$post_data,$post_body);";
+     . "VALUES ($date,$timestamp,$user_agent,$remote_address,$request_uri,$request_method,$post_data,$post_body);";
 $log_db->exec($sql);
 
 /*-------------------------------------*/
@@ -146,36 +216,36 @@ if (!$post) {
 }
 
 if ($post) {
-	$id = isset($_GET['id'])
-		? $_GET['id']
-		: false;
-	if (method_exists($service, 'saveData') && $msg = $service->saveData($post, $id)) {
-		echo $msg;
-		exit;
-	} else {
-		echo 'No save method for this data.';
-		exit;
-	}
+    $id = isset($_GET['id'])
+        ? $_GET['id']
+        : false;
+    if (method_exists($service, 'saveData') && $msg = $service->saveData($post, $id)) {
+        echo $msg;
+        exit;
+    } else {
+        echo 'No save method for this data.';
+        exit;
+    }
 }
 
 $get = $_GET;
 
 $callback       = false;
 if (isset($get['callback'])) {
-	$callback = $get['callback'];
-	unset($get['callback']);
+    $callback = $get['callback'];
+    unset($get['callback']);
 }
 
 $collect        = false;
 if (isset($get['collect'])) {
-	$collect = $get['collect'];
-	unset($get['collect']);
+    $collect = $get['collect'];
+    unset($get['collect']);
 }
 
 $collect_order = false;
 /*if (isset($get['collect_order'])) {
-	$collect = $get['collect_order'];
-	unset($get['collect_order']);
+    $collect = $get['collect_order'];
+    unset($get['collect_order']);
 }*/
 
 $helpers_only = false;
@@ -193,15 +263,15 @@ if (!$helpers_only) {
 }
 
 if ($collect) {
-	$collect = explode('_', $collect);
-	$collect_field = $collect[0];
-	if (isset($collect[1])) {
-		$collect_order = $collect[1];
-	}
-	$collect_method = 'getCollectedBy' . ucfirst(strtolower($collect_field));
-	if (method_exists($service, $collect_method)) {
-		$data = $service->$collect_method($data, $collect_order);
-	}
+    $collect = explode('_', $collect);
+    $collect_field = $collect[0];
+    if (isset($collect[1])) {
+        $collect_order = $collect[1];
+    }
+    $collect_method = 'getCollectedBy' . ucfirst(strtolower($collect_field));
+    if (method_exists($service, $collect_method)) {
+        $data = $service->$collect_method($data, $collect_order);
+    }
 }
 
 $helpers = false;
@@ -212,11 +282,11 @@ if (isset($get['helpers'])) {
 
 #echo "<pre>\n"; var_dump($helpers); echo "</pre>\n"; exit;
 if ($helpers) {
-	/*$collect = explode('_', $collect);
-	$collect_field = $collect[0];
-	if (isset($collect[1])) {
-		$collect_order = $collect[1];
-	}*/
+    /*$collect = explode('_', $collect);
+    $collect_field = $collect[0];
+    if (isset($collect[1])) {
+        $collect_order = $collect[1];
+    }*/
 
     $helpers_list = explode(',', $helpers);
     $n_helpers = count($helpers_list);
@@ -251,13 +321,13 @@ $json = json_encode($data);
 header('Access-Control-Allow-Origin: *');
 
 if ($callback) {
-	header('Content-type: text/javascipt');
-	#header('Content-Type: text/javascript; charset=utf8');
-	#header('Access-Control-Max-Age: 3628800');
-	#header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+    header('Content-type: text/javascipt');
+    #header('Content-Type: text/javascript; charset=utf8');
+    #header('Access-Control-Max-Age: 3628800');
+    #header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
 
-	echo $callback . '(' . $json . ')';
-	exit;
+    echo $callback . '(' . $json . ')';
+    exit;
 }
 
 header('Content-type: application/json');
