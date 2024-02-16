@@ -28,180 +28,180 @@ class DBIP_Exception extends Exception {
 
 class DBIP {
 
-	const TYPE_COUNTRY = 1;
-	const TYPE_CITY = 2;
-	const TYPE_LOCATION = 3;
-	const TYPE_ISP = 4;
-	const TYPE_FULL = 5;
-	
-	private $db;
-	
-	public function __construct(PDO $db) {
+    const TYPE_COUNTRY = 1;
+    const TYPE_CITY = 2;
+    const TYPE_LOCATION = 3;
+    const TYPE_ISP = 4;
+    const TYPE_FULL = 5;
 
-		$this->db = $db;
-		$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    private $db;
 
-	}
-    
+    public function __construct(PDO $db) {
+
+        $this->db = $db;
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    }
+
     public function Empty_Table($table_name = "dbip_lookup") {
         $this->db->query("TRUNCATE TABLE $table_name");
     }
 
-	public function Import_From_CSV($filename, $type, $table_name = "dbip_lookup", $progress_callback = null) {
+    public function Import_From_CSV($filename, $type, $table_name = "dbip_lookup", $progress_callback = null) {
 
-		switch ($type) {
+        switch ($type) {
 
-			case self::TYPE_COUNTRY:
-			$fields = array("ip_start", "ip_end", "country");
-			break;
+            case self::TYPE_COUNTRY:
+            $fields = array("ip_start", "ip_end", "country");
+            break;
 
-			case self::TYPE_CITY:
-			$fields = array("ip_start", "ip_end", "country", "stateprov", "city");
-			break;
-		
-			case self::TYPE_LOCATION:
-			$fields = array("ip_start", "ip_end", "country", "stateprov", "city", "latitude", "longitude", "timezone_offset", "timezone_name");
-			break;
+            case self::TYPE_CITY:
+            $fields = array("ip_start", "ip_end", "country", "stateprov", "city");
+            break;
 
-			case self::TYPE_ISP:
-			$fields = array("ip_start", "ip_end", "country", "isp_name", "connection_type", "organization_name");
-			break;
+            case self::TYPE_LOCATION:
+            $fields = array("ip_start", "ip_end", "country", "stateprov", "city", "latitude", "longitude", "timezone_offset", "timezone_name");
+            break;
 
-			case self::TYPE_FULL:
-			$fields = array("ip_start", "ip_end", "country", "stateprov", "city", "latitude", "longitude", "timezone_offset", "timezone_name", "isp_name", "connection_type", "organization_name");
-			break;
+            case self::TYPE_ISP:
+            $fields = array("ip_start", "ip_end", "country", "isp_name", "connection_type", "organization_name");
+            break;
 
-			default:
-			throw new DBIP_Exception("invalid database type");
-		
-		}
+            case self::TYPE_FULL:
+            $fields = array("ip_start", "ip_end", "country", "stateprov", "city", "latitude", "longitude", "timezone_offset", "timezone_name", "isp_name", "connection_type", "organization_name");
+            break;
 
-		if (!file_exists($filename)) {
-			throw new DBIP_Exception("file {$filename} does not exists");
-		}
+            default:
+            throw new DBIP_Exception("invalid database type");
 
-		$q = $this->Prepare_Import($table_name, $fields);
-		$f = @fopen($filename, "r");
+        }
 
-		if (!is_resource($f)) {
-			throw new DBIP_Exception("cannot open {$filename} for reading");
-		}
+        if (!file_exists($filename)) {
+            throw new DBIP_Exception("file {$filename} does not exists");
+        }
 
-		$nrecs = 0;
-		
-		while ($r = fgetcsv($f)) {
+        $q = $this->Prepare_Import($table_name, $fields);
+        $f = @fopen($filename, "r");
 
-			foreach ($r as $k => $v) {
-				switch ($fields[$k]) {
-					case "connection_type":
-					$r[$k] = $v ?: null;
-					break;
-					case "latitude":
-					case "longitude":
-					case "timezone_offset":
-					$r[$k] = (float)$v;
-					break;
-					case "isp_name":
-					case "organization_name":
-					$r[$k] = substr($v, 0, 128);
-					break;
-					case "city":
-					case "stateprov":
-					$r[$k] = substr($v, 0, 80);
-					break;
-					case "timezone_name":
-					$r[$k] = substr($v, 0, 64);
-					break;
-					default:
-					$r[$k] = stripslashes($v);
-				}
-			}
-			$r[] = self::Addr_Type($r[0]);
-			$r[0] = inet_pton($r[0]);
-			$r[1] = inet_pton($r[1]);
-			$this->Import_Row($q, $r);
-			
-			if ((($nrecs % 100) === 0) && is_callable($progress_callback)) {
-				call_user_func($progress_callback, $nrecs);
-			}
-			
-			$nrecs++;
-		
-		}
+        if (!is_resource($f)) {
+            throw new DBIP_Exception("cannot open {$filename} for reading");
+        }
 
-		fclose($f);
-		$this->Finalize_Import();
+        $nrecs = 0;
 
-		return $nrecs;
-	
-	}
+        while ($r = fgetcsv($f)) {
 
-	public function Lookup($addr, $table_name = "dbip_lookup", $country_table_name = "country_code_name") {
+            foreach ($r as $k => $v) {
+                switch ($fields[$k]) {
+                    case "connection_type":
+                    $r[$k] = $v ?: null;
+                    break;
+                    case "latitude":
+                    case "longitude":
+                    case "timezone_offset":
+                    $r[$k] = (float)$v;
+                    break;
+                    case "isp_name":
+                    case "organization_name":
+                    $r[$k] = substr($v, 0, 128);
+                    break;
+                    case "city":
+                    case "stateprov":
+                    $r[$k] = substr($v, 0, 80);
+                    break;
+                    case "timezone_name":
+                    $r[$k] = substr($v, 0, 64);
+                    break;
+                    default:
+                    $r[$k] = stripslashes($v);
+                }
+            }
+            $r[] = self::Addr_Type($r[0]);
+            $r[0] = inet_pton($r[0]);
+            $r[1] = inet_pton($r[1]);
+            $this->Import_Row($q, $r);
 
-		if ($ret = $this->Do_Lookup($table_name, $country_table_name, self::Addr_Type($addr), inet_pton($addr))) {
-			$ret->ip_start = inet_ntop($ret->ip_start);
-			$ret->ip_end = inet_ntop($ret->ip_end);
-			return $ret;
-		} else {
-			throw new DBIP_Exception("address not found");
-		}
+            if ((($nrecs % 100) === 0) && is_callable($progress_callback)) {
+                call_user_func($progress_callback, $nrecs);
+            }
 
-	}
+            $nrecs++;
 
-	protected function Prepare_Import($table_name, $fields) {
+        }
 
-		try {
+        fclose($f);
+        $this->Finalize_Import();
 
-			if ($this->db->query("select count(*) as cnt from `{$table_name}`")->fetchObject()->cnt) {
-				throw new DBIP_Exception("table {$table_name} is not empty");
-			}
-			
-			$this->db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-			$this->db->beginTransaction();
-			$q = $this->db->prepare("insert into `{$table_name}` (" . implode(",", $fields) . ",addr_type) values (" . implode(",", array_fill(0, count($fields), "?")) . ",?)");
+        return $nrecs;
 
-			return $q;
+    }
 
-		} catch (PDOException $e) {
+    public function Lookup($addr, $table_name = "dbip_lookup", $country_table_name = "country_code_name") {
 
-			throw new DBIP_Exception("database error: {$e->getMessage()}");
+        if ($ret = $this->Do_Lookup($table_name, $country_table_name, self::Addr_Type($addr), inet_pton($addr))) {
+            $ret->ip_start = inet_ntop($ret->ip_start);
+            $ret->ip_end = inet_ntop($ret->ip_end);
+            return $ret;
+        } else {
+            throw new DBIP_Exception("address not found");
+        }
 
-		}
+    }
 
-	}
+    protected function Prepare_Import($table_name, $fields) {
 
-	protected function Finalize_Import() {
+        try {
 
-		$this->db->commit();
+            if ($this->db->query("select count(*) as cnt from `{$table_name}`")->fetchObject()->cnt) {
+                throw new DBIP_Exception("table {$table_name} is not empty");
+            }
 
-	}
+            $this->db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+            $this->db->beginTransaction();
+            $q = $this->db->prepare("insert into `{$table_name}` (" . implode(",", $fields) . ",addr_type) values (" . implode(",", array_fill(0, count($fields), "?")) . ",?)");
 
-	protected function Import_Row($res, $row) {
+            return $q;
 
-		return $res->execute($row);
-	
-	}
+        } catch (PDOException $e) {
 
-	protected function Do_Lookup($table_name, $country_table_name, $addr_type, $addr_start) {
+            throw new DBIP_Exception("database error: {$e->getMessage()}");
 
-		$q = $this->db->prepare("SELECT dbip.*, ccn.country_name FROM `{$table_name}` dbip JOIN `{$country_table_name}` ccn ON dbip.country = ccn.country_code WHERE addr_type = ? AND ip_start <= ? ORDER BY ip_start desc LIMIT 1");
-		$q->execute(array($addr_type, $addr_start));
+        }
 
-		return $q->fetchObject();
-	
-	}
-	
-	static private function Addr_Type($addr) {
+    }
 
-		if (ip2long($addr) !== false) {
-			return "ipv4";
-		} else if (preg_match('/^[0-9a-fA-F:]+$/', $addr) && @inet_pton($addr)) {
-			return "ipv6";
-		} else {
-			throw new DBIP_Exception("unknown address type for {$addr}");
-		}
+    protected function Finalize_Import() {
 
-	}
+        $this->db->commit();
+
+    }
+
+    protected function Import_Row($res, $row) {
+
+        return $res->execute($row);
+
+    }
+
+    protected function Do_Lookup($table_name, $country_table_name, $addr_type, $addr_start) {
+
+        $q = $this->db->prepare("SELECT dbip.*, ccn.country_name FROM `{$table_name}` dbip JOIN `{$country_table_name}` ccn ON dbip.country = ccn.country_code WHERE addr_type = ? AND ip_start <= ? ORDER BY ip_start desc LIMIT 1");
+        $q->execute(array($addr_type, $addr_start));
+
+        return $q->fetchObject();
+
+    }
+
+    static private function Addr_Type($addr) {
+
+        if (ip2long($addr) !== false) {
+            return "ipv4";
+        } else if (preg_match('/^[0-9a-fA-F:]+$/', $addr) && @inet_pton($addr)) {
+            return "ipv6";
+        } else {
+            throw new DBIP_Exception("unknown address type for {$addr}");
+        }
+
+    }
 
 }
 
@@ -213,55 +213,55 @@ class DBIP {
  */
 /*class DBIP_MySQL extends DBIP {
 
-	private $db;
-	
-	public function __construct($db) {
+    private $db;
 
-		$this->db = $db;
-	
-	}
+    public function __construct($db) {
 
-	protected function Prepare_Import($table_name, $fields) {
+        $this->db = $db;
 
-		$q = mysql_query("select count(*) as cnt from `{$table_name}`", $this->db);
-		$r = mysql_fetch_object($q);
-		mysql_free_result($q);
+    }
 
-		if ($r->cnt) {
-			throw new DBIP_Exception("table {$table_name} is not empty");
-		}
+    protected function Prepare_Import($table_name, $fields) {
 
-		return array($table_name, $fields);
-	
-	}
+        $q = mysql_query("select count(*) as cnt from `{$table_name}`", $this->db);
+        $r = mysql_fetch_object($q);
+        mysql_free_result($q);
 
-	protected function Finalize_Import() {
-	}
+        if ($r->cnt) {
+            throw new DBIP_Exception("table {$table_name} is not empty");
+        }
 
-	protected function Import_Row($res, $row) {
+        return array($table_name, $fields);
 
-		$vals = array();
-		foreach ($row as $val) {
-			$vals[] = "'" . mysql_real_escape_string($val) . "'";
-		}
-		
-		if (!mysql_query("insert into `{$res[0]}` (" . implode(",", $res[1]) . ",addr_type) values (" . implode(",", $vals) . ")", $this->db)) {
-			throw new DBIP_Exception("database error: cannot insert row");
-		}
+    }
 
-		return true;
+    protected function Finalize_Import() {
+    }
 
-	}
+    protected function Import_Row($res, $row) {
 
-	protected function Do_Lookup($table_name, $addr_type, $addr_start) {
+        $vals = array();
+        foreach ($row as $val) {
+            $vals[] = "'" . mysql_real_escape_string($val) . "'";
+        }
 
-		$q = mysql_query("select * from `{$table_name}` where addr_type = '{$addr_type}' and ip_start <= '" . mysql_real_escape_string($addr_start) . "' order by ip_start desc limit 1", $this->db);
-		$r = mysql_fetch_object($q);
-		mysql_free_result($q);
+        if (!mysql_query("insert into `{$res[0]}` (" . implode(",", $res[1]) . ",addr_type) values (" . implode(",", $vals) . ")", $this->db)) {
+            throw new DBIP_Exception("database error: cannot insert row");
+        }
 
-		return $r;
-	
-	}
+        return true;
+
+    }
+
+    protected function Do_Lookup($table_name, $addr_type, $addr_start) {
+
+        $q = mysql_query("select * from `{$table_name}` where addr_type = '{$addr_type}' and ip_start <= '" . mysql_real_escape_string($addr_start) . "' order by ip_start desc limit 1", $this->db);
+        $r = mysql_fetch_object($q);
+        mysql_free_result($q);
+
+        return $r;
+
+    }
 
 }*/
 
@@ -273,55 +273,55 @@ class DBIP {
  */
 /*class DBIP_MySQLI extends DBIP {
 
-	private $db;
-	
-	public function __construct($db) {
+    private $db;
 
-		$this->db = $db;
-	
-	}
+    public function __construct($db) {
 
-	protected function Prepare_Import($table_name, $fields) {
+        $this->db = $db;
 
-		$q = mysqli_query($this->db, "select count(*) as cnt from `{$table_name}`");
-		$r = mysqli_fetch_object($q);
-		mysqli_free_result($q);
+    }
 
-		if ($r->cnt) {
-			throw new DBIP_Exception("table {$table_name} is not empty");
-		}
+    protected function Prepare_Import($table_name, $fields) {
 
-		return array($table_name, $fields);
-	
-	}
+        $q = mysqli_query($this->db, "select count(*) as cnt from `{$table_name}`");
+        $r = mysqli_fetch_object($q);
+        mysqli_free_result($q);
 
-	protected function Finalize_Import() {
-	}
+        if ($r->cnt) {
+            throw new DBIP_Exception("table {$table_name} is not empty");
+        }
 
-	protected function Import_Row($res, $row) {
+        return array($table_name, $fields);
 
-		$vals = array();
-		foreach ($row as $val) {
-			$vals[] = "'" . mysqli_real_escape_string($val) . "'";
-		}
-		
-		if (!mysqli_query($this->db, "insert into `{$res[0]}` (" . implode(",", $res[1]) . ",addr_type) values (" . implode(",", $vals) . ")")) {
-			throw new DBIP_Exception("database error: cannot insert row");
-		}
+    }
 
-		return true;
+    protected function Finalize_Import() {
+    }
 
-	}
+    protected function Import_Row($res, $row) {
 
-	protected function Do_Lookup($table_name, $addr_type, $addr_start) {
+        $vals = array();
+        foreach ($row as $val) {
+            $vals[] = "'" . mysqli_real_escape_string($val) . "'";
+        }
 
-		$q = mysqli_query($this->db, "select * from `{$table_name}` where addr_type = '{$addr_type}' and ip_start <= '" . mysqli_real_escape_string($addr_start) . "' order by ip_start desc limit 1");
-		$r = mysqli_fetch_object($q);
-		mysqli_free_result($q);
+        if (!mysqli_query($this->db, "insert into `{$res[0]}` (" . implode(",", $res[1]) . ",addr_type) values (" . implode(",", $vals) . ")")) {
+            throw new DBIP_Exception("database error: cannot insert row");
+        }
 
-		return $r;
-	
-	}
+        return true;
+
+    }
+
+    protected function Do_Lookup($table_name, $addr_type, $addr_start) {
+
+        $q = mysqli_query($this->db, "select * from `{$table_name}` where addr_type = '{$addr_type}' and ip_start <= '" . mysqli_real_escape_string($addr_start) . "' order by ip_start desc limit 1");
+        $r = mysqli_fetch_object($q);
+        mysqli_free_result($q);
+
+        return $r;
+
+    }
 
 }*/
 

@@ -4,16 +4,16 @@
 #echo "<pre>\n"; var_dump($_COOKIE); echo "</pre>\n";
 $application_env = $_SERVER['SERVER_NAME'] == 'dev.npeu.ox.ac.uk' ? 'development' : (($_SERVER['SERVER_NAME'] == 'test.npeu.ox.ac.uk' || $_SERVER['SERVER_NAME'] == 'sandbox.npeu.ox.ac.uk' || $_SERVER['SERVER_NAME'] == 'next.npeu.ox.ac.uk') ? 'testing' : 'production');
 if ($application_env == 'development') {
-	@define('DEV', true);
+    @define('DEV', true);
     ini_set('display_errors', 'on');
 } else {
-	@define('DEV', false);
+    @define('DEV', false);
 }
 
 if ($application_env == 'testing') {
-	@define('TEST', true);
+    @define('TEST', true);
 } else {
-	@define('TEST', false);
+    @define('TEST', false);
 }
 
 //session_start();
@@ -81,13 +81,13 @@ exit;
 //
 
 if (!defined('DS')) {
-	define('DS', DIRECTORY_SEPARATOR);
+    define('DS', DIRECTORY_SEPARATOR);
 }
 
 set_include_path(implode(PATH_SEPARATOR, array(
-	'DataService',
-	get_include_path(),
-	)));
+    'DataService',
+    get_include_path(),
+    )));
 spl_autoload_register(function($class) {
         @include str_replace('_', '/', $class) . '.php';
     }
@@ -118,7 +118,7 @@ $log_username = NPEU_DATABASE_USR;
 $log_password = NPEU_DATABASE_PWD;
 
 $log_db = new PDO("mysql:host=$log_host;dbname=$log_database", $log_username, $log_password, array(
-	PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
+    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
 ));
 
 $date           = $log_db->quote(date('c'));
@@ -133,7 +133,7 @@ $post_body      = isset($_POST) ? $log_db->quote(file_get_contents('php://input'
 #echo "Body<pre>"; var_dump( $post_body ); echo "</pre>"; exit;
 
 $sql = "INSERT INTO `log` (`date`,`timestamp`,`user_agent`,`remote_address`,`request_uri`,`request_method`,`post_data`,`post_body`) "
-	 . "VALUES ($date,$timestamp,$user_agent,$remote_address,$request_uri,$request_method,$post_data,$post_body);";
+     . "VALUES ($date,$timestamp,$user_agent,$remote_address,$request_uri,$request_method,$post_data,$post_body);";
 $log_db->exec($sql);
 
 /*-------------------------------------*/
@@ -146,36 +146,36 @@ if (!$post) {
 }
 
 if ($post) {
-	$id = isset($_GET['id'])
-		? $_GET['id']
-		: false;
-	if (method_exists($service, 'saveData') && $msg = $service->saveData($post, $id)) {
-		echo $msg;
-		exit;
-	} else {
-		echo 'No save method for this data.';
-		exit;
-	}
+    $id = isset($_GET['id'])
+        ? $_GET['id']
+        : false;
+    if (method_exists($service, 'saveData') && $msg = $service->saveData($post, $id)) {
+        echo $msg;
+        exit;
+    } else {
+        echo 'No save method for this data.';
+        exit;
+    }
 }
 
 $get = $_GET;
 
 $callback       = false;
 if (isset($get['callback'])) {
-	$callback = $get['callback'];
-	unset($get['callback']);
+    $callback = $get['callback'];
+    unset($get['callback']);
 }
 
 $collect        = false;
 if (isset($get['collect'])) {
-	$collect = $get['collect'];
-	unset($get['collect']);
+    $collect = $get['collect'];
+    unset($get['collect']);
 }
 
 $collect_order = false;
 /*if (isset($get['collect_order'])) {
-	$collect = $get['collect_order'];
-	unset($get['collect_order']);
+    $collect = $get['collect_order'];
+    unset($get['collect_order']);
 }*/
 
 $helpers_only = false;
@@ -193,15 +193,15 @@ if (!$helpers_only) {
 }
 
 if ($collect) {
-	$collect = explode('_', $collect);
-	$collect_field = $collect[0];
-	if (isset($collect[1])) {
-		$collect_order = $collect[1];
-	}
-	$collect_method = 'getCollectedBy' . ucfirst(strtolower($collect_field));
-	if (method_exists($service, $collect_method)) {
-		$data = $service->$collect_method($data, $collect_order);
-	}
+    $collect = explode('_', $collect);
+    $collect_field = $collect[0];
+    if (isset($collect[1])) {
+        $collect_order = $collect[1];
+    }
+    $collect_method = 'getCollectedBy' . ucfirst(strtolower($collect_field));
+    if (method_exists($service, $collect_method)) {
+        $data = $service->$collect_method($data, $collect_order);
+    }
 }
 
 $helpers = false;
@@ -212,11 +212,11 @@ if (isset($get['helpers'])) {
 
 #echo "<pre>\n"; var_dump($helpers); echo "</pre>\n"; exit;
 if ($helpers) {
-	/*$collect = explode('_', $collect);
-	$collect_field = $collect[0];
-	if (isset($collect[1])) {
-		$collect_order = $collect[1];
-	}*/
+    /*$collect = explode('_', $collect);
+    $collect_field = $collect[0];
+    if (isset($collect[1])) {
+        $collect_order = $collect[1];
+    }*/
 
     $helpers_list = explode(',', $helpers);
     $n_helpers = count($helpers_list);
@@ -251,13 +251,13 @@ $json = json_encode($data);
 header('Access-Control-Allow-Origin: *');
 
 if ($callback) {
-	header('Content-type: text/javascipt');
-	#header('Content-Type: text/javascript; charset=utf8');
-	#header('Access-Control-Max-Age: 3628800');
-	#header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+    header('Content-type: text/javascipt');
+    #header('Content-Type: text/javascript; charset=utf8');
+    #header('Access-Control-Max-Age: 3628800');
+    #header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
 
-	echo $callback . '(' . $json . ')';
-	exit;
+    echo $callback . '(' . $json . ')';
+    exit;
 }
 
 header('Content-type: application/json');

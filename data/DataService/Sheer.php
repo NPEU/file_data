@@ -12,9 +12,9 @@
  **/
 class Sheer extends DataServiceDB
 {
-	public function __construct()
-	{
-		parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
 
         $hostname  = 'localhost';
         $jhostname = 'localhost';
@@ -54,9 +54,9 @@ class Sheer extends DataServiceDB
 
 
         $this->base_sql    = 'SELECT d.*, b.primary_colour, b.secondary_colour, b.tertiary_colour, b.logo_svg, b.logo_svg_with_fallback, b.logo_svg_path, b.logo_png_path, b.params';
-		$this->base_sql   .= "\n" . ' FROM ' . $this->main_table . ' d';
-		$this->base_sql   .= "\n" . ' JOIN `' . $jdatabase . '`.`jancore_brands` b ON d.alias = b.alias';
-	}
+        $this->base_sql   .= "\n" . ' FROM ' . $this->main_table . ' d';
+        $this->base_sql   .= "\n" . ' JOIN `' . $jdatabase . '`.`jancore_brands` b ON d.alias = b.alias';
+    }
 
     public function postQuery($data)
     {
@@ -75,10 +75,10 @@ class Sheer extends DataServiceDB
     }
 
 
-	public function getState($value)
-	{
-		return $this->parseValue($value, 'd.state', '%s');
-	}
+    public function getState($value)
+    {
+        return $this->parseValue($value, 'd.state', '%s');
+    }
 
 
 }

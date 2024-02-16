@@ -13,11 +13,11 @@
  **/
 class User extends DataServiceDB
 {
-	public $sort_key = false;
+    public $sort_key = false;
 
-	public function __construct()
-	{
-		parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
 
         if (DEV) {
             $jdatabase = 'jan_dev';
@@ -33,46 +33,46 @@ class User extends DataServiceDB
         $jusername = NPEU_DATABASE_USR;
         $jpassword = NPEU_DATABASE_PWD;
 
-		$this->dao = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, array(
-			PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-		));
+        $this->dao = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, array(
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
+        ));
 
 
         $this->main_table  = '`jancore_users`';
-		$this->base_sql    = 'SELECT usr.id, usr.username, usr.password, usr.block, usr.email FROM ' . $this->main_table . ' usr';
-		$this->base_sql   .= ' JOIN `jancore_user_usergroup_map` ugmap ON usr.id = ugmap.user_id';
-		$this->base_sql   .= ' JOIN `jancore_usergroups` ugp ON ugmap.group_id = ugp.id ';
+        $this->base_sql    = 'SELECT usr.id, usr.username, usr.password, usr.block, usr.email FROM ' . $this->main_table . ' usr';
+        $this->base_sql   .= ' JOIN `jancore_user_usergroup_map` ugmap ON usr.id = ugmap.user_id';
+        $this->base_sql   .= ' JOIN `jancore_usergroups` ugp ON ugmap.group_id = ugp.id ';
 
         /*$this->base_wheres = array(
-			'usr.block = 0'
-		);*/
+            'usr.block = 0'
+        );*/
 
         // Users may not explicitly a Staff member so I can't really limit the query at this stage
         // (at least my SQL isn't good enough to write that query)
 
-		/*$this->main_table  = '`jancore_users`';
-		$this->base_sql    = 'SELECT usr.id, usr.username, usr.password FROM ' . $this->main_table . ' usr';
-		$this->base_sql   .= ' JOIN `jancore_user_usergroup_map` ugmap ON usr.id = ugmap.user_id';
-		$this->base_sql   .= ' JOIN `jancore_usergroups` ugp ON ugmap.group_id = ugp.id ';
+        /*$this->main_table  = '`jancore_users`';
+        $this->base_sql    = 'SELECT usr.id, usr.username, usr.password FROM ' . $this->main_table . ' usr';
+        $this->base_sql   .= ' JOIN `jancore_user_usergroup_map` ugmap ON usr.id = ugmap.user_id';
+        $this->base_sql   .= ' JOIN `jancore_usergroups` ugp ON ugmap.group_id = ugp.id ';
 
         $this->base_wheres = array(
-			'ugp.title = "Staff"',
-			'AND usr.block = 0'
-		);*/
-	}
+            'ugp.title = "Staff"',
+            'AND usr.block = 0'
+        );*/
+    }
 
-	public function init()
-	{
-		if (!in_array($_SERVER['REMOTE_ADDR'], NPEU_SAFE_IPS)) {
-			#trigger_error('', E_USER_ERROR);
-			return false;
-		}
-        
-		return true;
-	}
+    public function init()
+    {
+        if (!in_array($_SERVER['REMOTE_ADDR'], NPEU_SAFE_IPS)) {
+            #trigger_error('', E_USER_ERROR);
+            return false;
+        }
+
+        return true;
+    }
 
     public function run($get = array())
-	{
+    {
         // Require a username parameter:
         if (!isset($get['username']) && !isset($get['id'])) {
             //trigger_error('Username required', E_USER_ERROR);
@@ -82,7 +82,7 @@ class User extends DataServiceDB
     }
 
     public function postQuery($data)
-	{
+    {
         #echo "Data:<pre>"; var_dump( $data ); echo "</pre>"; exit;
         if (count($data) == 0) {
             return $data;
@@ -208,14 +208,14 @@ class User extends DataServiceDB
         }
     }
 
-	public function getUsername($value)
-	{
-		return $this->parseValue($value, 'username', '= %s');
-	}
+    public function getUsername($value)
+    {
+        return $this->parseValue($value, 'username', '= %s');
+    }
 
     public function getId($value)
-	{
-		return $this->parseValue($value, 'usr.id', ' %s');
-	}
+    {
+        return $this->parseValue($value, 'usr.id', ' %s');
+    }
 
 }

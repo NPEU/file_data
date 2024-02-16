@@ -2,9 +2,9 @@
 require 'DataHelpers.php';
 
 function output($query){
-	$query = 'publications?' . urldecode($query);
-	echo '<h2>' . $query . '</h2>';
-	echo '<p><a href="https://dev.npeu.ox.ac.uk/data/' . $query . '">https://dev.npeu.ox.ac.uk/data/' . $query . '</a></p><hr />';
+    $query = 'publications?' . urldecode($query);
+    echo '<h2>' . $query . '</h2>';
+    echo '<p><a href="https://dev.npeu.ox.ac.uk/data/' . $query . '">https://dev.npeu.ox.ac.uk/data/' . $query . '</a></p><hr />';
 }
 
 $human_readable = "authors: Knight";
