@@ -13,43 +13,43 @@
 class TopRecruiters extends DataServiceJSONDir
 {
 
-	public function __construct()
-	{
-		parent::__construct();
-		$this->dir = $_SERVER['DOCUMENT_ROOT'] . '/datastore/top-recruiters';
-		/*if (LOCALHOST) {
-			if (DEV) {
-				$jdatabase = 'jan_dev';
-			} else {
-				$jdatabase = 'jan';
-			}
+    public function __construct()
+    {
+        parent::__construct();
+        $this->dir = $_SERVER['DOCUMENT_ROOT'] . '/datastore/top-recruiters';
+        /*if (LOCALHOST) {
+            if (DEV) {
+                $jdatabase = 'jan_dev';
+            } else {
+                $jdatabase = 'jan';
+            }
 
-		} else {
-			if (DEV) {
-				$jdatabase = 'jan_dev';
-			} else {
-				$jdatabase = 'jan';
-			}
-			$jhostname = 'localhost';
-			$jusername = 'scriptusermed';
-			$jpassword = 'squ1l00kal';
-		}*/
-		$data = array();
-		$files = array_diff(scandir($this->dir), array('..', '.'));
-		foreach ($files as $file) {
-			$id = str_replace('.json', '', $file);
-			$data[$id] = json_decode(file_get_contents($this->dir . '/' .$file));
-		}
-		$this->data = $data;
-	}
+        } else {
+            if (DEV) {
+                $jdatabase = 'jan_dev';
+            } else {
+                $jdatabase = 'jan';
+            }
+            $jhostname = 'localhost';
+            $jusername = 'scriptusermed';
+            $jpassword = 'squ1l00kal';
+        }*/
+        $data = array();
+        $files = array_diff(scandir($this->dir), array('..', '.'));
+        foreach ($files as $file) {
+            $id = str_replace('.json', '', $file);
+            $data[$id] = json_decode(file_get_contents($this->dir . '/' .$file));
+        }
+        $this->data = $data;
+    }
 
-	public function getId($value)
-	{
-		$ids = explode(',', trim($value, '()'));
-		$data = array();
-		foreach ($ids as $id) {
-			$data[$id] = $this->data[$id];
-		}
-		return $data;
-	}
+    public function getId($value)
+    {
+        $ids = explode(',', trim($value, '()'));
+        $data = array();
+        foreach ($ids as $id) {
+            $data[$id] = $this->data[$id];
+        }
+        return $data;
+    }
 }

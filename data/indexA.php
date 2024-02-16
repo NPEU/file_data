@@ -3,17 +3,17 @@
 #echo "<pre>\n"; var_dump($_SERVER); echo "</pre>\n";
 #exit;
 if (!defined('DS')) {
-	define('DS', DIRECTORY_SEPARATOR);
+    define('DS', DIRECTORY_SEPARATOR);
 }
 
 set_include_path(implode(PATH_SEPARATOR, array(
-	'DataService',
-	get_include_path(),
-	)));
+    'DataService',
+    get_include_path(),
+    )));
 
 spl_autoload_register(create_function('$class',
-	"include str_replace('_', '/', \$class) . '.php';"
-	));
+    "include str_replace('_', '/', \$class) . '.php';"
+    ));
 
 $classname = ucfirst(trim($_SERVER['PATH_INFO'], '/'));
 $service   = new $classname;
@@ -34,64 +34,64 @@ $values   = array();
 
 $i = 0;
 foreach ($_GET as $key => $value) {
-	if ($key == 'order') {
-		$order = $value;
-		continue;
-	}
-	if ($key == 'group') {
-		$group = $value;
-		continue;
-	}
-	if ($key == 'helpers') {
-		$helpers = explode('+', $value);
-		continue;
-	}
-	if ($key == 'callback') {
-		$callback = $value;
-		continue;
-	}
-	$key = str_replace('~', '', $key, $count);
-	if (array_key_exists($key, $sql_map)) {
-		// Ignore and/or on first item:
-		if ($i > 0 && isset($wheres[$key])) {
-			$and_or = (bool) $count ? ' OR ' : ' AND ';
-		}  else {
-		    $and_or = '';
-		}
-		// Prepared statements don't like ! in placeholders, so replace with N:
-		$val_key          = ':' . str_replace('!', 'N', $key) . $i;
-		$wheres[$key][]   = $and_or . sprintf($sql_map[$key], $val_key);
-		$values[$val_key] = $value;
-		$i++;
-	}
+    if ($key == 'order') {
+        $order = $value;
+        continue;
+    }
+    if ($key == 'group') {
+        $group = $value;
+        continue;
+    }
+    if ($key == 'helpers') {
+        $helpers = explode('+', $value);
+        continue;
+    }
+    if ($key == 'callback') {
+        $callback = $value;
+        continue;
+    }
+    $key = str_replace('~', '', $key, $count);
+    if (array_key_exists($key, $sql_map)) {
+        // Ignore and/or on first item:
+        if ($i > 0 && isset($wheres[$key])) {
+            $and_or = (bool) $count ? ' OR ' : ' AND ';
+        }  else {
+            $and_or = '';
+        }
+        // Prepared statements don't like ! in placeholders, so replace with N:
+        $val_key          = ':' . str_replace('!', 'N', $key) . $i;
+        $wheres[$key][]   = $and_or . sprintf($sql_map[$key], $val_key);
+        $values[$val_key] = $value;
+        $i++;
+    }
 }
 
 $sql = $main_sql . "\nWHERE ";
 $c = count($wheres);
 $i = 0;
 foreach ($wheres as $where) {
-	if (count($where) > 1) {
-		$sql .= '(' . implode("\n", $where) . ')';
-	} else {
-	    $sql .= $where[0];
-	}
-	if ($i < $c) {
-		$sql .= " AND \n";
-	}
-	$i++;
+    if (count($where) > 1) {
+        $sql .= '(' . implode("\n", $where) . ')';
+    } else {
+        $sql .= $where[0];
+    }
+    if ($i < $c) {
+        $sql .= " AND \n";
+    }
+    $i++;
 }
 echo "<pre>\n"; var_dump($sql); echo "</pre>\n"; exit;
 #$sql = $main_sql . "\nWHERE " . implode("\n", $wheres);
 #$sql = $main_sql . "\nWHERE " . implode("\n", $wheres);
 
 if ($group) {
-	$sql .= "\GROUP BY :group";
-	$values[':group'] = $value;
+    $sql .= "\GROUP BY :group";
+    $values[':group'] = $value;
 }
 /*
 if ($order) {
-	$sql .= "\nORDER BY :order";
-	$values[':order'] = $value;
+    $sql .= "\nORDER BY :order";
+    $values[':order'] = $value;
 }
 */
 #$sql .= ';';
@@ -119,9 +119,9 @@ exit;
 
 $json = json_encode($data);
 if ($callback) {
-	header('Content-type: text/javascipt');
-	echo $callback . '(' . $json . ')';
-	exit;
+    header('Content-type: text/javascipt');
+    echo $callback . '(' . $json . ')';
+    exit;
 }
 
 header('Content-type: application/json');

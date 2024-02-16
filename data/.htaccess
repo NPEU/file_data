@@ -2,9 +2,9 @@
 # Single Entry Point
 # ----------------------------------------------------------------------
 <IfModule mod_rewrite.c>
-	Options +FollowSymlinks
-	RewriteEngine On
-	RewriteBase /data
+    Options +FollowSymlinks
+    RewriteEngine On
+    RewriteBase /data
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
