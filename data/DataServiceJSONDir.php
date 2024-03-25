@@ -70,7 +70,7 @@ class DataServiceJSONDir extends DataService
     public function saveData($data, $id)
     {
         // Should add better validation stuff here.
-        if (!in_array($id, $known_ids)) {
+        if (!in_array($id, NPEU_KNOWN_IDS)) {
             die;
         }
         $file = $this->dir . '/' . $id . '.json';
