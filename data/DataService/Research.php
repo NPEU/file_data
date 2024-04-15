@@ -20,13 +20,13 @@ class Research extends DataServiceDB
     {
         parent::__construct($params);
         $hostname = 'localhost';
-        
-        if (DEV) {
+
+        if (DEV || TEST) {
             $database = 'intranet_petal_dev';
         } else {
             $database = 'intranet_petal';
         }
-        
+
         $username = NPEU_DATABASE_USR;
         $password = NPEU_DATABASE_PWD;
 
@@ -37,7 +37,7 @@ class Research extends DataServiceDB
         ));
 
         $jhostname = 'localhost';
-        if (DEV) {
+        if (DEV || TEST) {
             $jdatabase = 'jan_dev';
         } else {
             $jdatabase = 'jan';
