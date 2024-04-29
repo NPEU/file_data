@@ -68,10 +68,7 @@ class Publications extends DataServiceDB
     public function getCollectedByYear($data, $order = false)
     {
         $years = $this->getHelperYears($order);
-        #echo "<pre>\n";var_dump($years);echo "</pre>\n";exit;
         $data  = $this->collectData($data, $years, 'year', 'publications');
-        #$this->collectData($data, array_keys($display_groups), 'displaygroup', 'people', $display_groups);
-        #echo "getCollectedByYear<pre>\n";var_dump($data);echo "</pre>\n";exit;
         return $data;
     }
 
@@ -79,8 +76,6 @@ class Publications extends DataServiceDB
     {
         $types = $this->getHelperTypes($order);
         $data  = $this->collectData($data, $types, 'type', 'publications');
-        #$this->collectData($data, array_keys($display_groups), 'displaygroup', 'people', $display_groups);
-        #echo "<pre>\n";var_dump($data);echo "</pre>\n";exit;
         return $data;
     }
 

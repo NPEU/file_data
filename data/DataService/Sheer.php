@@ -33,8 +33,8 @@ class Sheer extends DataServiceDB
             ini_set('display_errors', 1);
         }
 
-        $username = NPEU_DATABASE_USR;
-        $password = NPEU_DATABASE_PWD;
+        $username  = NPEU_DATABASE_USR;
+        $password  = NPEU_DATABASE_PWD;
         $jusername = NPEU_DATABASE_USR;
         $jpassword = NPEU_DATABASE_PWD;
 
@@ -44,23 +44,25 @@ class Sheer extends DataServiceDB
 
         $this->dao = new PDO("mysql:host=$hostname;dbname=$database", $username, $password, array(
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-        ));
+        )
+        );
 
         $this->jan_dao = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, array(
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-        ));
+        )
+        );
 
-        $this->main_table  = '`' . $database . '`.`sheer_data`';
+        $this->main_table = '`' . $database . '`.`sheer_data`';
 
 
-        $this->base_sql    = 'SELECT d.*, b.primary_colour, b.secondary_colour, b.tertiary_colour, b.logo_svg, b.logo_svg_with_fallback, b.logo_svg_path, b.logo_png_path, b.params';
-        $this->base_sql   .= "\n" . ' FROM ' . $this->main_table . ' d';
-        $this->base_sql   .= "\n" . ' JOIN `' . $jdatabase . '`.`jancore_brands` b ON d.alias = b.alias';
+        $this->base_sql  = 'SELECT d.*, b.primary_colour, b.secondary_colour, b.tertiary_colour, b.logo_svg, b.logo_svg_with_fallback, b.logo_svg_path, b.logo_png_path, b.params';
+        $this->base_sql .= "\n" . ' FROM ' . $this->main_table . ' d';
+        $this->base_sql .= "\n" . ' JOIN `' . $jdatabase . '`.`jancore_brands` b ON d.alias = b.alias';
     }
 
     public function postQuery($data)
     {
-        $public_root_path  = realpath($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR;
+        $public_root_path = realpath($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR;
         foreach ($data as &$item) {
             $item['image_info'] = getimagesize($public_root_path . $item['logo_png_path']);
 
@@ -74,11 +76,8 @@ class Sheer extends DataServiceDB
         return $data;
     }
 
-
     public function getState($value)
     {
         return $this->parseValue($value, 'd.state', '%s');
     }
-
-
 }
