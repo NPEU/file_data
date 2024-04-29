@@ -52,20 +52,6 @@ define('BASE_PATH', $base_path . DS);
 //define( 'JDATE', 'Y-m-d H:i:s A' );
 //define( '_JEXEC', 1 );
 
-/*
-if (DEV) {
-    define( 'JPATH_BASE', BASE_PATH . 'jan_dev' . DS .'public' );
-    define( 'TOP_DOMAIN', 'https://dev.npeu.ox.ac.uk' );
-    define( 'JDB', 'jan_dev' );
-} elseif (TEST) {
-    define( 'JPATH_BASE', BASE_PATH . 'jan_test' . DS .'public' );
-    define( 'TOP_DOMAIN', 'https://test.npeu.ox.ac.uk' );
-    define( 'JDB', 'jan_test' );
-} else {
-    define( 'JPATH_BASE', BASE_PATH . 'jan' . DS .'public' );
-    define( 'TOP_DOMAIN', 'https://www.npeu.ox.ac.uk' );
-    define( 'JDB', 'jan' );
-}*/
 
 switch ($application_domain) {
     case 'dev':
@@ -83,7 +69,6 @@ switch ($application_domain) {
 }
 
 define('_JEXEC', 1);
-#define('JPATH_BASE', dirname(__DIR__));
 
 //If this file is not placed in the /root directory of a Joomla instance put the directory for Joomla libraries here.
 $joomla_directory = BASE_PATH;
@@ -121,7 +106,7 @@ $container->alias($session_alias, 'session.' . $session_suffix)
 // Instantiate the application.
 $app = $container->get($class_name::class);
 // Set the application as global app
-\Joomla\CMS\Factory::$application = $app;
+Factory::$application = $app;
 
 #echo "<pre>"; var_dump(get_class_methods($app)); echo "</pre>"; exit;
 
@@ -150,9 +135,6 @@ exit;
 */
 //
 
-if (!defined('DS')) {
-    define('DS', DIRECTORY_SEPARATOR);
-}
 
 set_include_path(implode(PATH_SEPARATOR, array(
     'DataService',

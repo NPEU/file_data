@@ -5,11 +5,11 @@
         <description>Joomla! file_data file</description>
         <element>file_data</element>
         <type>file</type>
-        <version>1.8.1</version>
+        <version>2.0.0</version>
         <client>site</client>
-        <infourl title="NPEU: file_data">https://github.com/NPEU/file_data/releases/tag/v1.8.1</infourl>
+        <infourl title="NPEU: file_data">https://github.com/NPEU/file_data/releases/tag/v2.0.0</infourl>
         <downloads>
-            <downloadurl type="full" format="zip">https://github.com/NPEU/file_data/archive/v1.8.1.zip</downloadurl>
+            <downloadurl type="full" format="zip">https://github.com/NPEU/file_data/archive/v2.0.0.zip</downloadurl>
         </downloads>
         <targetplatform name="joomla" />
         <tags>
