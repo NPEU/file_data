@@ -35,9 +35,9 @@ class Staff extends DataServiceDB
         $jusername = NPEU_DATABASE_USR;
         $jpassword = NPEU_DATABASE_PWD;
 
-        $this->dao     = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, [
+        $this->dao     = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, array(
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-        ]);
+        ));
         $this->main_table  = '`jancore_users`';
 
         $this->base_sql    = 'SELECT usr.id, usr.name, usr.email, usr.registerDate AS register_date FROM ' . $this->main_table . ' usr';
@@ -46,15 +46,15 @@ class Staff extends DataServiceDB
 
         #echo $this->base_sql; exit;
         if (isset($_GET['external']) && $_GET['external'] === '1') {
-            $this->base_wheres = [
+            $this->base_wheres = array(
                 'ugp.title = "Staff" OR ugp.title = "External Staff"',
                 'AND usr.block = 0'
-            ];
+            );
         } else {
-            $this->base_wheres = [
+            $this->base_wheres = array(
                 'ugp.title = "Staff"',
                 'AND usr.block = 0'
-            ];
+            );
         }
 
         if (isset($_GET['basic']) && $_GET['basic'] === '1' ) {
@@ -69,7 +69,7 @@ class Staff extends DataServiceDB
         #file_put_contents(__DIR__ . '/log.txt', $_SERVER['REMOTE_ADDR']);
 
         // This service relies on the staff profile Jooomla plugin:
-        $profile_file = $_SERVER['DOCUMENT_ROOT'] . '/plugins/user/staffprofile/profiles/profile.xml';
+        $profile_file = $_SERVER['DOCUMENT_ROOT'] . '/plugins/user/staffprofile/forms/profile.xml';
         if (!file_exists($profile_file)) {
             #trigger_error('Staff service relies on the staff profile jooomla plugin', E_USER_WARNING);
             return false;
@@ -81,7 +81,7 @@ class Staff extends DataServiceDB
     {
         #echo $_SERVER['REMOTE_ADDR']; exit;
         #echo "<pre>\n";var_dump($data);echo "</pre>\n";exit;
-        $new_data = [];
+        $new_data = array();
 
         /*$not_basic_data = array(
             'biography',
@@ -94,7 +94,7 @@ class Staff extends DataServiceDB
             'pa',
             'pa_details_only'
         );*/
-        $basic_data = [
+        $basic_data = array(
             'id',
             'name',
             'email',
@@ -107,7 +107,7 @@ class Staff extends DataServiceDB
             'qualifications',
             'avatar_img',
             'profile_img_src'
-        ];
+        );
 
         foreach ($data as $key => $item) {
 
@@ -116,7 +116,7 @@ class Staff extends DataServiceDB
             $sql .= ' ORDER BY ordering';
             #echo "<pre>\n";var_dump($sql);echo "</pre>\n";
             foreach ($this->dao->query($sql) as $row) {
-                $profile_key = str_replace(['staffprofile.', 'firstlastnames.'], '', $row['profile_key']);
+                $profile_key = str_replace(array('staffprofile.', 'firstlastnames.'), '', $row['profile_key']);
                 if ($this->basic_data_only) {
                     if(in_array($profile_key, $basic_data)) {
                         $item[$profile_key] = $row['profile_value'];
@@ -133,7 +133,7 @@ class Staff extends DataServiceDB
             }
             if (!empty($item['publications_query'])) {
                 #echo "<pre>\n";var_dump($item['publications']);echo "</pre>\n";
-                $query = str_replace(["\r", "\n\n"], "\n", $item['publications_query']);
+                $query = str_replace(array("\r", "\n\n"), "\n", $item['publications_query']);
                 #echo "<pre>\n";var_dump($query);echo "</pre>\n";exit;
                 $f_query = DataHelpers::formatQuery($query);
                 #echo "<pre>\n";var_dump($query);echo "</pre>\n";exit;
@@ -205,7 +205,7 @@ class Staff extends DataServiceDB
 
             // Get Team member details:
             if (!empty($item['team'])) {
-                $members = [];
+                $members = array();
                 $member_ids = json_decode($item['team']);
                 $data_uri = $_SERVER['DOMAIN'] . '/data/staff?id=';
 
@@ -222,22 +222,18 @@ class Staff extends DataServiceDB
 
             // Get Project details:
             if (!empty($item['projects'])) {
-                $projects = [];
+                $projects = array();
                 $project_ids = json_decode($item['projects']);
 
-                /*$sql  = 'SELECT c.id, c.title, c.alias, fv.value AS long_title ';
+                $sql  = 'SELECT c.id, c.title, c.alias, fv.value AS long_title ';
                 $sql .= 'FROM `jancore_categories` c ';
                 $sql .= 'JOIN `jancore_fields_values` fv ON c.id = fv.item_id AND fv.field_id = 12 '; // Hard-coded value not robust/transferable.
                 $sql .= 'WHERE id IN(' . implode(',', $project_ids) . ') ';
-                $sql .= 'ORDER BY c.title;';*/
-                $sql  = 'SELECT id ';
-                $sql .= 'FROM `jancore_brands` ';
-                $sql .= 'WHERE id IN(' . implode(',', $project_ids) . ') ';
-                $sql .= 'ORDER BY name;';
-                #echo "<pre>\n";var_dump($sql);echo "</pre>\n";exit;
-                $profile_data = [];
+                $sql .= 'ORDER BY c.title;';
+                #echo "<pre>\n";var_dump($sql);echo "</pre>\n";
+                $profile_data = array();
                 foreach ($this->dao->query($sql, PDO::FETCH_ASSOC) as $row) {
-                    $projects[] = $row['id'];
+                    $projects[] = $row;
                 }
 
                 $item['projects'] = $projects;
@@ -286,7 +282,7 @@ class Staff extends DataServiceDB
 
 
             // PA
-            if (!empty($item['pa']) && is_array($item['pa']) && !empty($item['pa'][0])) {
+            if (!empty($item['pa'])) {
                 $pa_data = json_decode(file_get_contents($_SERVER['DOMAIN'] . '/data/staff?id=' . $item['pa'] . '&basic=1'), true);
                 $item['pa_details'] = $pa_data[0];
             }
@@ -358,13 +354,13 @@ class Staff extends DataServiceDB
 
     public function getHelperDisplaygroup($order = false)
     {
-        $form_string = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/plugins/user/staffprofile/profiles/profile.xml');
+        $form_string = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/plugins/user/staffprofile/forms/profile.xml');
         $form_xml    = new SimpleXMLElement($form_string);
         $option_objs = $form_xml->xpath('//field[@name="displaygroup"]/option[@value!=""]');
-        $data        = [];
+        $data        = array();
         foreach ($option_objs as $node) {
             $name   = (string) $node;
-            $meta   = ['alias' => preg_replace('/[^a-z0-9-]/', '', str_replace(' ', '-', strtolower($name)))];
+            $meta   = array('alias' => preg_replace('/[^a-z0-9-]/', '', str_replace(' ', '-', strtolower($name))));
             $data[$name] = $meta;
 
         }

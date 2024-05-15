@@ -1,7 +1,6 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+require (__DIR__ . '/Encoding.php');
 use \ForceUTF8\Encoding;
-
 /**
  * DataServiceDB
  *
@@ -116,7 +115,7 @@ class DataServiceDB extends DataService
         }
 
         if ($this->group) {
-            $sql .= "\nGROUP BY :group";
+            $sql .= "\GROUP BY :group";
             $values[':group'] = $this->group;
         }
 
