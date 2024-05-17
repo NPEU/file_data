@@ -222,18 +222,22 @@ class Staff extends DataServiceDB
 
             // Get Project details:
             if (!empty($item['projects'])) {
-                $projects = array();
+                $projects = [];
                 $project_ids = json_decode($item['projects']);
 
-                $sql  = 'SELECT c.id, c.title, c.alias, fv.value AS long_title ';
+                /*$sql  = 'SELECT c.id, c.title, c.alias, fv.value AS long_title ';
                 $sql .= 'FROM `jancore_categories` c ';
                 $sql .= 'JOIN `jancore_fields_values` fv ON c.id = fv.item_id AND fv.field_id = 12 '; // Hard-coded value not robust/transferable.
                 $sql .= 'WHERE id IN(' . implode(',', $project_ids) . ') ';
-                $sql .= 'ORDER BY c.title;';
-                #echo "<pre>\n";var_dump($sql);echo "</pre>\n";
-                $profile_data = array();
+                $sql .= 'ORDER BY c.title;';*/
+                $sql  = 'SELECT id ';
+                $sql .= 'FROM `jancore_brands` ';
+                $sql .= 'WHERE id IN(' . implode(',', $project_ids) . ') ';
+                $sql .= 'ORDER BY name;';
+                #echo "<pre>\n";var_dump($sql);echo "</pre>\n";exit;
+                $profile_data = [];
                 foreach ($this->dao->query($sql, PDO::FETCH_ASSOC) as $row) {
-                    $projects[] = $row;
+                    $projects[] = $row['id'];
                 }
 
                 $item['projects'] = $projects;
