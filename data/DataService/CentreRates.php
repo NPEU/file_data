@@ -2,7 +2,7 @@
 /**
  * CentreRates
  *
- * {DESCRIPTION}
+ * Get Centre rates data
  *
  * @package DataService
  * @author akirk
@@ -34,8 +34,8 @@ class CentreRates extends DataServiceJSONDir
             $jusername = 'scriptusermed';
             $jpassword = 'squ1l00kal';
         }*/
-        $data = array();
-        $files = array_diff(scandir($this->dir), array('..', '.'));
+        $data = [];
+        $files = array_diff(scandir($this->dir), ['..', '.']);
         foreach ($files as $file) {
             $id = str_replace('.json', '', $file);
             $data[$id] = json_decode(file_get_contents($this->dir . '/' .$file));
@@ -46,7 +46,7 @@ class CentreRates extends DataServiceJSONDir
     public function getId($value)
     {
         $ids = explode(',', trim($value, '()'));
-        $data = array();
+        $data = [];
         foreach ($ids as $id) {
             $data[$id] = $this->data[$id];
         }

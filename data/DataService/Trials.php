@@ -26,17 +26,16 @@ class Trials extends DataServiceDB
         $hostname  = 'localhost';
         $jhostname = 'localhost';
 
-        if (DEV) {
-            $database  = 'trials_dev';
-            $jdatabase = 'jan_dev';
+        if (DEV || TEST) {
             ini_set('display_errors', 1);
-        } elseif (TEST) {
-            $database  = 'trials_test';
-            $jdatabase = 'jan_test';
-            ini_set('display_errors', 1);
-        } else {
-            $database  = 'trials';
-            $jdatabase = 'jan';
+        }
+
+        $database  = 'trials';
+        $jdatabase = 'jan';
+        $domain = str_replace('.npeu.ox.ac.uk', '', $_SERVER['SERVER_NAME']);
+        if ($domain != 'www') {
+            $database   .= '_' . $domain;
+            $jdatabase .= '_' . $domain;
         }
 
         $username  = NPEU_DATABASE_USR;
@@ -48,22 +47,22 @@ class Trials extends DataServiceDB
         $this->database  = $database;
         $this->jdatabase = $jdatabase;
 
-        $this->dao = new PDO("mysql:host=$hostname;dbname=$database", $username, $password, array(
+        $this->dao = new PDO("mysql:host=$hostname;dbname=$database", $username, $password, [
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-        ));
+        ]);
 
-        $this->jan_dao = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, array(
+        $this->jan_dao = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, [
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-        ));
+        ]);
 
         $this->main_table  = '`' . $database . '`.`trials_data`';
 
         $this->base_sql    = 'SELECT d.*, b.primary_colour, b.secondary_colour, b.tertiary_colour, b.logo_svg, b.logo_svg_with_fallback, b.logo_svg_path, b.logo_png_path, b.params';
         $this->base_sql   .= "\n" . ' FROM ' . $this->main_table . ' d';
         $this->base_sql   .= "\n" . ' LEFT JOIN `' . $jdatabase . '`.`jancore_brands` b ON d.alias = b.alias';
-        $this->base_wheres = array(
+        $this->base_wheres = [
             'web_include = "Y"',
-        );
+        ];
     }
 
     public function postQuery($data)
@@ -126,7 +125,7 @@ class Trials extends DataServiceDB
 
     public function getHelperStatuses($order = '')
     {
-        $data = array();
+        $data = [];
         if (!empty($order)) {
             $order = ' ORDER BY `status` ' . $order;
         }

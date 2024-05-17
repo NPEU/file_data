@@ -19,18 +19,16 @@ class Sheer extends DataServiceDB
         $hostname  = 'localhost';
         $jhostname = 'localhost';
 
-        if (DEV) {
-            $database  = 'sheer_dev';
-            $jdatabase = 'jan_dev';
+        if (DEV || TEST) {
             ini_set('display_errors', 1);
-        } elseif (TEST) {
-            $database  = 'sheer_test';
-            $jdatabase = 'jan_test';
+        }
 
-        } else {
-            $database  = 'sheer';
-            $jdatabase = 'jan';
-            ini_set('display_errors', 1);
+        $database  = 'sheer';
+        $jdatabase = 'jan';
+        $domain = str_replace('.npeu.ox.ac.uk', '', $_SERVER['SERVER_NAME']);
+        if ($domain != 'www') {
+            $database   .= '_' . $domain;
+            $jdatabase .= '_' . $domain;
         }
 
         $username  = NPEU_DATABASE_USR;
@@ -42,15 +40,13 @@ class Sheer extends DataServiceDB
         $this->database  = $database;
         $this->jdatabase = $jdatabase;
 
-        $this->dao = new PDO("mysql:host=$hostname;dbname=$database", $username, $password, array(
+        $this->dao = new PDO("mysql:host=$hostname;dbname=$database", $username, $password, [
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-        )
-        );
+        ]);
 
-        $this->jan_dao = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, array(
+        $this->jan_dao = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, [
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-        )
-        );
+        ]);
 
         $this->main_table = '`' . $database . '`.`sheer_data`';
 

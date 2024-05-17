@@ -12,32 +12,34 @@
  **/
 class Publications extends DataServiceDB
 {
+
+
+
     public function __construct()
     {
         parent::__construct();
 
-        $jhostname  = 'localhost';
-
-        if (DEV) {
-            $jdatabase = 'jan_dev';
+        if (DEV || TEST) {
             ini_set('display_errors', 1);
-        } elseif (TEST) {
-            $jdatabase = 'jan_test';
-            ini_set('display_errors', 1);
-        } else {
-            $jdatabase = 'jan';
         }
 
+        $jdatabase = 'jan';
+        $domain = str_replace('.npeu.ox.ac.uk', '', $_SERVER['SERVER_NAME']);
+        if ($domain != 'www') {
+            $jdatabase .= '_' . $domain;
+        }
+
+        $jhostname = 'localhost';
         $jusername = NPEU_DATABASE_USR;
         $jpassword = NPEU_DATABASE_PWD;
 
-        $this->dao     = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, array(
+        $this->dao     = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, [
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-        ));
-
+        ]);
         $this->main_table  = '`jancore_publications`';
+
         $this->base_sql    = 'SELECT * FROM ' . $this->main_table;
-        $this->base_wheres = array();
+        $this->base_wheres = [];
     }
 
     public function getAuthors($value)
@@ -81,7 +83,7 @@ class Publications extends DataServiceDB
 
     public function getHelperYears($order = false)
     {
-        $data = array();
+        $data = [];
         if (!empty($order)) {
             $order = ' ORDER BY `year` ' . $order;
         }
@@ -95,7 +97,7 @@ class Publications extends DataServiceDB
 
     public function getHelperTypes($order = false)
     {
-        $data = array();
+        $data = [];
         if (!empty($order)) {
             $order = ' ORDER BY `type` ' . $order;
         }

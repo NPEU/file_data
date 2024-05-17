@@ -19,25 +19,23 @@ class Staff extends DataServiceDB
     {
         parent::__construct();
 
-        $jhostname = 'localhost';
-
-        if (DEV) {
-            $jdatabase = 'jan_dev';
+        if (DEV || TEST) {
             ini_set('display_errors', 1);
-        } else if (TEST) {
-            $jdatabase = 'jan_test';
-            ini_set('display_errors', 1);
-        } else {
-            $jdatabase = 'jan';
         }
 
+        $jdatabase = 'jan';
+        $domain = str_replace('.npeu.ox.ac.uk', '', $_SERVER['SERVER_NAME']);
+        if ($domain != 'www') {
+            $jdatabase .= '_' . $domain;
+        }
 
+        $jhostname = 'localhost';
         $jusername = NPEU_DATABASE_USR;
         $jpassword = NPEU_DATABASE_PWD;
 
-        $this->dao     = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, array(
+        $this->dao     = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, [
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-        ));
+        ]);
         $this->main_table  = '`jancore_users`';
 
         $this->base_sql    = 'SELECT usr.id, usr.name, usr.email, usr.registerDate AS register_date FROM ' . $this->main_table . ' usr';
@@ -46,15 +44,15 @@ class Staff extends DataServiceDB
 
         #echo $this->base_sql; exit;
         if (isset($_GET['external']) && $_GET['external'] === '1') {
-            $this->base_wheres = array(
+            $this->base_wheres = [
                 'ugp.title = "Staff" OR ugp.title = "External Staff"',
                 'AND usr.block = 0'
-            );
+            ];
         } else {
-            $this->base_wheres = array(
+            $this->base_wheres = [
                 'ugp.title = "Staff"',
                 'AND usr.block = 0'
-            );
+            ];
         }
 
         if (isset($_GET['basic']) && $_GET['basic'] === '1' ) {
@@ -81,9 +79,9 @@ class Staff extends DataServiceDB
     {
         #echo $_SERVER['REMOTE_ADDR']; exit;
         #echo "<pre>\n";var_dump($data);echo "</pre>\n";exit;
-        $new_data = array();
+        $new_data = [];
 
-        /*$not_basic_data = array(
+        /*$not_basic_data = [
             'biography',
             'custom',
             'custom_title',
@@ -93,8 +91,8 @@ class Staff extends DataServiceDB
             'team',
             'pa',
             'pa_details_only'
-        );*/
-        $basic_data = array(
+        ];*/
+        $basic_data = [
             'id',
             'name',
             'email',
@@ -107,7 +105,7 @@ class Staff extends DataServiceDB
             'qualifications',
             'avatar_img',
             'profile_img_src'
-        );
+        ];
 
         foreach ($data as $key => $item) {
 
@@ -116,7 +114,7 @@ class Staff extends DataServiceDB
             $sql .= ' ORDER BY ordering';
             #echo "<pre>\n";var_dump($sql);echo "</pre>\n";
             foreach ($this->dao->query($sql) as $row) {
-                $profile_key = str_replace(array('staffprofile.', 'firstlastnames.'), '', $row['profile_key']);
+                $profile_key = str_replace(['staffprofile.', 'firstlastnames.'], '', $row['profile_key']);
                 if ($this->basic_data_only) {
                     if(in_array($profile_key, $basic_data)) {
                         $item[$profile_key] = $row['profile_value'];
@@ -125,7 +123,7 @@ class Staff extends DataServiceDB
                     $item[$profile_key] = $row['profile_value'];
                 }
             }
-            #echo "<pre>\n";var_dump($item);echo "</pre>\n";exit;
+
             // Add any publications:
             if (!$this->basic_data_only) {
                 $item['publications_uri']  = '';
@@ -133,7 +131,7 @@ class Staff extends DataServiceDB
             }
             if (!empty($item['publications_query'])) {
                 #echo "<pre>\n";var_dump($item['publications']);echo "</pre>\n";
-                $query = str_replace(array("\r", "\n\n"), "\n", $item['publications_query']);
+                $query = str_replace(["\r", "\n\n"], "\n", $item['publications_query']);
                 #echo "<pre>\n";var_dump($query);echo "</pre>\n";exit;
                 $f_query = DataHelpers::formatQuery($query);
                 #echo "<pre>\n";var_dump($query);echo "</pre>\n";exit;
@@ -205,7 +203,7 @@ class Staff extends DataServiceDB
 
             // Get Team member details:
             if (!empty($item['team'])) {
-                $members = array();
+                $members = [];
                 $member_ids = json_decode($item['team']);
                 $data_uri = $_SERVER['DOMAIN'] . '/data/staff?id=';
 
@@ -361,10 +359,10 @@ class Staff extends DataServiceDB
         $form_string = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/plugins/user/staffprofile/forms/profile.xml');
         $form_xml    = new SimpleXMLElement($form_string);
         $option_objs = $form_xml->xpath('//field[@name="displaygroup"]/option[@value!=""]');
-        $data        = array();
+        $data        = [];
         foreach ($option_objs as $node) {
             $name   = (string) $node;
-            $meta   = array('alias' => preg_replace('/[^a-z0-9-]/', '', str_replace(' ', '-', strtolower($name))));
+            $meta   = ['alias' => preg_replace('/[^a-z0-9-]/', '', str_replace(' ', '-', strtolower($name)))];
             $data[$name] = $meta;
 
         }

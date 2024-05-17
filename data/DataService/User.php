@@ -2,8 +2,7 @@
 /**
  * User
  *
- * Get User info for internal use:
- * https://dev.npeu.ox.ac.uk/data/user?id=602
+ * Get User info for internal use:  * https://dev.npeu.ox.ac.uk/data/user?id=602
  *
  * @package DataService
  * @author akirk
@@ -15,37 +14,37 @@ class User extends DataServiceDB
 {
     public $sort_key = false;
 
+
     public function __construct()
     {
         parent::__construct();
 
-        if (DEV) {
-            $jdatabase = 'jan_dev';
+        if (DEV || TEST) {
             ini_set('display_errors', 1);
-        } else if (TEST) {
-            $jdatabase = 'jan_test';
-            ini_set('display_errors', 1);
-        } else {
-            $jdatabase = 'jan';
+        }
+
+        $jdatabase = 'jan';
+        $domain = str_replace('.npeu.ox.ac.uk', '', $_SERVER['SERVER_NAME']);
+        if ($domain != 'www') {
+            $jdatabase .= '_' . $domain;
         }
 
         $jhostname = 'localhost';
         $jusername = NPEU_DATABASE_USR;
         $jpassword = NPEU_DATABASE_PWD;
 
-        $this->dao = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, array(
+        $this->dao     = new PDO("mysql:host=$jhostname;dbname=$jdatabase", $jusername, $jpassword, [
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8;'
-        ));
-
-
+        ]);
         $this->main_table  = '`jancore_users`';
+
         $this->base_sql    = 'SELECT usr.id, usr.username, usr.password, usr.block, usr.email FROM ' . $this->main_table . ' usr';
         $this->base_sql   .= ' JOIN `jancore_user_usergroup_map` ugmap ON usr.id = ugmap.user_id';
         $this->base_sql   .= ' JOIN `jancore_usergroups` ugp ON ugmap.group_id = ugp.id ';
 
-        /*$this->base_wheres = array(
+        /*$this->base_wheres = [
             'usr.block = 0'
-        );*/
+        ];*/
 
         // Users may not explicitly a Staff member so I can't really limit the query at this stage
         // (at least my SQL isn't good enough to write that query)
@@ -55,14 +54,15 @@ class User extends DataServiceDB
         $this->base_sql   .= ' JOIN `jancore_user_usergroup_map` ugmap ON usr.id = ugmap.user_id';
         $this->base_sql   .= ' JOIN `jancore_usergroups` ugp ON ugmap.group_id = ugp.id ';
 
-        $this->base_wheres = array(
+        $this->base_wheres = [
             'ugp.title = "Staff"',
             'AND usr.block = 0'
-        );*/
+        ];*/
     }
 
     public function init()
     {
+        #echo $_SERVER['REMOTE_ADDR'];
         if (!in_array($_SERVER['REMOTE_ADDR'], NPEU_SAFE_IPS)) {
             #trigger_error('', E_USER_ERROR);
             return false;
@@ -71,7 +71,7 @@ class User extends DataServiceDB
         return true;
     }
 
-    public function run($get = array())
+    public function run($get = [])
     {
         // Require a username parameter:
         if (!isset($get['username']) && !isset($get['id'])) {
@@ -96,9 +96,9 @@ class User extends DataServiceDB
         $sql .= ' WHERE user_id = ' . (int) $data['id'] . ' AND (profile_key LIKE "staffprofile.%" OR profile_key LIKE "firstlastnames.%")';
         $sql .= ' ORDER BY ordering';
         #echo "<pre>\n";var_dump($sql);echo "</pre>\n";
-        $profile_data = array();
+        $profile_data = [];
         foreach ($this->dao->query($sql) as $row) {
-            $profile_key = str_replace(array('staffprofile.', 'firstlastnames.'), '', $row['profile_key']);
+            $profile_key = str_replace(['staffprofile.', 'firstlastnames.'], '', $row['profile_key']);
             $profile_data[$profile_key] = $row['profile_value'];
         }
         //echo "Data:<pre>"; var_dump( $profile_data ); echo "</pre>"; exit;
@@ -119,27 +119,27 @@ class User extends DataServiceDB
 
 
 
-        $all_groups            = array();
-        $explicit_users_groups = array();
-        $all_users_groups      = array();
+        $all_groups            = [];
+        $explicit_users_groups = [];
+        $all_users_groups      = [];
 
         $sql  = 'SELECT ugp.id AS id, ugp.parent_id AS parent_id, ugp.title AS title FROM `jancore_users` usr JOIN `jancore_user_usergroup_map` ugmap ON usr.id = ugmap.user_id JOIN `jancore_usergroups` ugp ON ugmap.group_id = ugp.id';
         $sql .= ' WHERE user_id = ' . (int) $data['id'];
 
         foreach ($this->dao->query($sql) as $row) {
-            $explicit_users_groups[$row['id']] = array(
+            $explicit_users_groups[$row['id']] = [
                 'title'     => $row['title'],
                 'parent_id' => $row['parent_id']
-            );
+            ];
         }
 
         $sql = 'SELECT id, parent_id, title FROM `jancore_usergroups` ORDER BY lft;';
 
         foreach ($this->dao->query($sql) as $row) {
-            $all_groups[$row['id']] = array(
+            $all_groups[$row['id']] = [
                 'title'     => $row['title'],
                 'parent_id' => $row['parent_id']
-            );
+            ];
         }
 
         #echo "<pre>"; var_dump($all_groups); echo "</pre>";
@@ -163,8 +163,8 @@ class User extends DataServiceDB
 
         #echo "<pre>"; var_dump($all_users_groups); echo "</pre>";
 
-        $ordered_users_groups_flat = array();
-        $ordered_users_groups_path = array();
+        $ordered_users_groups_flat = [];
+        $ordered_users_groups_path = [];
         // Loop trough $all_groups (which is in the correct order) to correctly order the users'
         // groups:
         foreach ($all_groups as $id => $group) {
@@ -180,7 +180,7 @@ class User extends DataServiceDB
 
         }
 
-        $ordered_users_groups_nested = array();
+        $ordered_users_groups_nested = [];
         foreach($ordered_users_groups_path as $element){
             $this->assignArrayByPath($ordered_users_groups_nested, $element);
         }
