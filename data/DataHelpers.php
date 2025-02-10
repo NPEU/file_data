@@ -18,17 +18,20 @@ class DataHelpers
         // Tidy spacing:
         $human_readable = str_replace(', ', ',', $human_readable);
         $rows    = explode("\n", trim($human_readable));
-        $return  = array();
-        $fields  = array();
+        $return  = [];
+        $fields  = [];
         $order   = '';
         $collect = '';
         foreach ($rows as $row) {
-            if (strpos($row, ':') == false) {
+            // Validate expected format:
+            $pattern = "#^[a-zA-Z]+:\s?[[a-zA-Z0-9]\s()<>=,-_:]+$#";
+            if (preg_match($pattern, $row) == false) {
                 continue;
             }
+            #echo "<pre>\n"; var_dump(preg_match($pattern, $row)); echo "</pre>\n";
 
             $items = explode(':', $row);
-            #echo "<pre>\n"; var_dump($items); echo "</pre>\n";
+
 
             if (strtolower(trim($items[0])) == 'order') {
                 $order = trim($items[1]);
@@ -85,7 +88,7 @@ class DataHelpers
     /*public static function formatQuery($human_readable)
     {
         $rows   = explode("\n", trim($human_readable));
-        $return = array();
+        $return = [];
         foreach ($rows as $row) {
             $or    = '';
             $not   = '';

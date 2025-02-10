@@ -134,7 +134,7 @@ class Staff extends DataServiceDB
                 $query = str_replace(["\r", "\n\n"], "\n", $item['publications_query']);
                 #echo "<pre>\n";var_dump($query);echo "</pre>\n";exit;
                 $f_query = DataHelpers::formatQuery($query);
-                #echo "<pre>\n";var_dump($query);echo "</pre>\n";exit;
+                #echo "<pre>\n";var_dump($f_query);echo "</pre>\n";exit;
                 #echo "<pre>\n";var_dump(preg_match_all('/(\d{1,3}|\d{4}-\d{2}|NPEU-\d+)\n/', $query, $matches));echo "</pre>\n";exit;
                 if ($f_query) {
                     // Valid query formatted:
