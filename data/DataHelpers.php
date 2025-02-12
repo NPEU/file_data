@@ -16,6 +16,7 @@ class DataHelpers
     public static function formatQuery($human_readable)
     {
         // Tidy spacing:
+        $human_readable = str_replace(["\r", "\n\n"], "\n", $human_readable);
         $human_readable = str_replace(', ', ',', $human_readable);
         $rows    = explode("\n", trim($human_readable));
         $return  = [];
@@ -24,7 +25,7 @@ class DataHelpers
         $collect = '';
         foreach ($rows as $row) {
             // Validate expected format:
-            $pattern = "#^[a-zA-Z]+:\s?[[a-zA-Z0-9]\s()<>=,-_:]+$#";
+            $pattern = "#^[a-zA-Z]+:\s?[a-zA-Z0-9\s()<>=,\-_:]+$#";
             if (preg_match($pattern, $row) == false) {
                 continue;
             }
