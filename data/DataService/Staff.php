@@ -130,12 +130,12 @@ class Staff extends DataServiceDB
                 $item['publications_data'] = '';
             }
 
-            if (!empty($item['publications_query'])) {
-                #echo "<pre>\n";var_dump($item['publications_query']);echo "</pre>\n"; #exit;
-                #$query = str_replace(["\r", "\n\n"], "\n", $item['publications_query']);
-                #echo "<pre>\n";var_dump($query);echo "</pre>\n";#exit;
-                $f_query = DataHelpers::formatQuery($item['publications_query']);
-                #echo "<pre>\n";var_dump($f_query);echo "</pre>\n";exit;
+            $query = trim($item['publications_query']);
+            #echo "<pre>\n";var_dump($query);echo "</pre>\n";exit;
+            if (!empty($query)) {
+
+                $f_query = DataHelpers::formatQuery($query);
+                echo "<pre>\n";var_dump($f_query);echo "</pre>\n";exit;
                 #echo "<pre>\n";var_dump(preg_match_all('/^(\d{1,3}|\d{4}-\d{2,3}[a-z]?|NPEU-\d+)$/', $query, $matches));echo "</pre>\n";exit;
                 if ($f_query) {
                     // Valid query formatted:
@@ -145,7 +145,7 @@ class Staff extends DataServiceDB
                     $item['publications_data'] = json_decode(file_get_contents($data_uri), true);
                 } elseif (preg_match_all('/^(\d{1,3}|\d{4}-\d{2,3}[a-z]?|NPEU-\d+)$/', $query, $matches)) {
                     // Entry may be a list of call numbers (one on each line), so try that:
-                    $pq  =  preg_replace('#(\r|\n)+#', ',', $item['publications_query']);
+                    $pq  =  preg_replace('#(\r|\n)+#', ',', $query);
                     #echo "<pre>\n";var_dump($pq);echo "</pre>\n";exit;
                     $pq  = 'call_number=' . $pq . "&order=+FIELD(call_number,'" . str_replace(',', "','", $pq) . "')&collect=type";
                     $uri = $_SERVER['DOMAIN'] . '/data/publications?' . $pq;
