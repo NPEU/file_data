@@ -129,13 +129,17 @@ class Staff extends DataServiceDB
                 $item['publications_uri']  = '';
                 $item['publications_data'] = '';
             }
+            #echo "<pre>\n";var_dump($item);echo "</pre>\n";#exit;
+            $query = false;
+            if (!empty($item['publications_query'])) {
+                $query = trim($item['publications_query']);
+            }
 
-            $query = trim($item['publications_query']);
             #echo "<pre>\n";var_dump($query);echo "</pre>\n";exit;
             if (!empty($query)) {
 
                 $f_query = DataHelpers::formatQuery($query);
-                echo "<pre>\n";var_dump($f_query);echo "</pre>\n";exit;
+                #echo "<pre>\n";var_dump($f_query);echo "</pre>\n";exit;
                 #echo "<pre>\n";var_dump(preg_match_all('/^(\d{1,3}|\d{4}-\d{2,3}[a-z]?|NPEU-\d+)$/', $query, $matches));echo "</pre>\n";exit;
                 if ($f_query) {
                     // Valid query formatted:
